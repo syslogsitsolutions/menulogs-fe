@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default brand colors (will be overridden by brandThemeStore) */
+    --brand-50: #fef6ee;
+    --brand-100: #fde9d7;
+    --brand-200: #fad0ae;
+    --brand-300: #f6af7b;
+    --brand-400: #f28446;
+    --brand-500: #ee6620;
+    --brand-600: #df4d16;
+    --brand-700: #b93915;
+    --brand-800: #932f19;
+    --brand-900: #762917;
+    --brand-text: #ffffff;
+  }
+
+  body {
+    @apply font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Custom scrollbar for category navigation */
+  .category-scroll::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .category-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .category-scroll::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+  
+  .category-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+
+  .category-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+}
