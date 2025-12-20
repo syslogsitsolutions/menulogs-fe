@@ -31,7 +31,7 @@ jobs:
       - name: Build frontend
         run: npm run build
         env:
-          VITE_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.menulogs.in' || 'https://api-dev.menulogs.in' }}
+          VITE_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.menulogs.in/api/v1' || 'https://api-dev.menulogs.in/api/v1' }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
