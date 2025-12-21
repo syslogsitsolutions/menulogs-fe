@@ -69,12 +69,13 @@ const Footer = () => {
             {/* Brand */}
             <div>
               <Link to="/" className="flex items-center space-x-2 mb-4 group">
-                <div className="bg-gradient-to-br from-brand-500 to-brand-600 p-2 rounded-lg">
+                {/* <div className="bg-gradient-to-br from-brand-500 to-brand-600 p-2 rounded-lg">
                   <ChefHat className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white font-serif">MenuLogs</h1>
-                </div>
+                </div> */}
+                <img src="/logo-full-1.png" alt="MenuLogs" className="h-10 object-cover" />
               </Link>
               <p className="text-sm text-gray-400 mb-4">
                 The modern platform for restaurant menu management. Create, customize, and share your digital menus with ease.
