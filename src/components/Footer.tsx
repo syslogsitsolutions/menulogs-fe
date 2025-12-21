@@ -5,7 +5,7 @@ import { usePublicMenuBySlug } from '../hooks/usePublicMenu';
 const Footer = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
-  const isRootPage = location.pathname === '/';
+  const isPlatformPage = location.pathname === '/' || location.pathname === '/business';
   
   // Only fetch business data if we have a slug (hook already handles enabled: !!slug)
   const { data, isLoading } = usePublicMenuBySlug(slug || '');
@@ -60,8 +60,8 @@ const Footer = () => {
 
   const hoursList = locationData?.openingHours ? formatHours(locationData.openingHours) : null;
 
-  // Platform-wide footer for root page
-  if (isRootPage) {
+  // Platform-wide footer for root page and business landing page
+  if (isPlatformPage) {
     return (
       <footer className="bg-dark-900 text-gray-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -106,6 +106,11 @@ const Footer = () => {
                 <li>
                   <Link to="/" className="text-sm hover:text-brand-500 transition-colors">
                     Home
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/business" className="text-sm hover:text-brand-500 transition-colors">
+                    For Restaurants
                   </Link>
                 </li>
                 <li>

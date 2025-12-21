@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import BrandThemeInitializer from './components/BrandThemeInitializer';
 import HomePage from './pages/HomePage';
 import LandingPage from './pages/LandingPage';
+import BusinessLandingPage from './pages/BusinessLandingPage';
 import MenuListingPage from './pages/MenuListingPage';
 import MenuItemDetailPage from './pages/MenuItemDetailPage';
 import AboutPage from './pages/AboutPage';
@@ -167,6 +168,9 @@ function App() {
         {/* Customer-facing Routes */}
         {/* Home page - Restaurant selector */}
         <Route path="/" element={<HomePage />} />
+        
+        {/* Business Landing Page (B2B) */}
+        <Route path="/business" element={<BusinessLandingPage />} />
         
         {/* Restaurant Menu Routes (slug-based) */}
         <Route path="/:slug" element={

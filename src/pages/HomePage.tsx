@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, MapPin, Loader2 } from 'lucide-react';
 import Footer from '../components/Footer';
@@ -93,7 +93,11 @@ const HomePage = () => {
           </div>
 
           <div className="mt-16 text-sm text-gray-400">
-            <p>Restaurant owners: <a href="/login" className="text-primary-600 hover:underline">Login to manage your menu</a></p>
+            <p>
+              Restaurant owners: <a href="/login" className="text-primary-600 hover:underline">Login to manage your menu</a>
+              {' '} | {' '}
+              <Link to="/business" className="text-primary-600 hover:underline font-semibold">Learn about MenuLogs for Business</Link>
+            </p>
           </div>
         </motion.div>
       </div>
