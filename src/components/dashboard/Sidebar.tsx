@@ -56,13 +56,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         {/* Logo */}
         <div className="h-20 flex items-center justify-between px-6 border-b border-gray-200">
           <div className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-              <ChefHat className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-dark-900 font-serif">Luxe Dining</h1>
-              <p className="text-xs text-gray-500">Dashboard</p>
-            </div>
+            <img src="/logo-full-black.png" alt="MenuLogs" className="w-full h-full" />
           </div>
           <button
             onClick={onClose}

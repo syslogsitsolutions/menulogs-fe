@@ -75,7 +75,7 @@ const Footer = () => {
                 <div>
                   <h1 className="text-xl font-bold text-white font-serif">MenuLogs</h1>
                 </div> */}
-                <img src="/logo-full-1.png" alt="MenuLogs" className="h-10 object-cover" />
+                <img src="/logo-full-white.png" alt="MenuLogs" className="h-10 object-cover" />
               </Link>
               <p className="text-sm text-gray-400 mb-4">
                 The modern platform for restaurant menu management. Create, customize, and share your digital menus with ease.

@@ -42,11 +42,11 @@ const BusinessSetupPage = () => {
         className="w-full max-w-2xl"
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl mb-4">
-            <ChefHat className="w-8 h-8 text-white" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img src="/logo-66x66.png" alt="MenuLogs" className="w-16 h-16" />
           </div>
-          <h1 className="text-3xl font-bold text-dark-900 font-serif">Luxe Dining</h1>
-          <p className="text-gray-600 mt-2">Tell us about your restaurant business</p>
+          <h1 className="text-3xl font-bold text-dark-900 font-serif">MenuLogs</h1>
+          <p className="text-gray-600 mt-2">Tell us about your restaurant's menu</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">

@@ -15,7 +15,7 @@ const Header = () => {
   const location = data?.location;
   const business = location?.business;
   const businessLogo = business?.logo;
-  const businessName = business?.name || 'Luxe Dining';
+  const businessName = business?.name || 'MenuLogs';
   
   // Determine the home link - use slug if available, otherwise use root
   const homeLink = slug ? `/${slug}` : '/';
