@@ -8,7 +8,6 @@ import {
   MapPin, 
   CreditCard, 
   Settings, 
-  ChefHat,
   Sparkles,
   X
 } from 'lucide-react';

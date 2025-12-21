@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Mail, Lock, ChefHat, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useSignup } from '@/hooks';
 
 const SignupPage = () => {

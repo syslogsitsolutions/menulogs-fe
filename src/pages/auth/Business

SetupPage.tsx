@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Upload, ChefHat, AlertCircle } from 'lucide-react';
+import { Building2, Upload, AlertCircle } from 'lucide-react';
 import { useCreateBusiness } from '@/hooks';
 
 const BusinessSetupPage = () => {

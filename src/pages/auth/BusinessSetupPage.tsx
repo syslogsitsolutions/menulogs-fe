@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Building2, Image as ImageIcon, FileText, ArrowRight, Upload, X } from 'lucide-react';
+import { Building2, Image as ImageIcon, FileText, ArrowRight, Upload, X, MapPin, Loader2 } from 'lucide-react';
 import { useCreateBusiness } from '@/hooks';
+import { fetchPostalCodeData } from '@/utils/postalCode';
 
 const BusinessSetupPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,15 @@ const BusinessSetupPage = () => {
   const [description, setDescription] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
   const [logoFile, setLogoFile] = useState<File | undefined>(undefined);
+  
+  // Address fields
+  const [pincode, setPincode] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('India');
+  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,6 +62,37 @@ const BusinessSetupPage = () => {
     }
     setLogoFile(undefined);
     setLogoPreview('');
+  };
+
+  // Handle pincode change and fetch location data
+  const handlePincodeChange = async (value: string) => {
+    const cleanValue = value.replace(/\D/g, ''); // Remove non-digits
+    setPincode(cleanValue);
+    setPincodeError('');
+
+    // Only fetch if we have 6 digits
+    if (cleanValue.length === 6) {
+      setLoadingPincode(true);
+      try {
+        const postalData = await fetchPostalCodeData(cleanValue);
+        if (postalData) {
+          setCity(postalData.district || postalData.city || '');
+          setState(postalData.state || '');
+          setPincodeError('');
+        } else {
+          setPincodeError('Invalid pincode. Please enter a valid 6-digit Indian pincode.');
+          // Don't clear city/state if user manually entered them
+        }
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
+        setPincodeError('Unable to fetch location details. Please enter manually.');
+      } finally {
+        setLoadingPincode(false);
+      }
+    } else if (cleanValue.length > 6) {
+      // Prevent entering more than 6 digits
+      setPincode(cleanValue.slice(0, 6));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,6 +218,108 @@ const BusinessSetupPage = () => {
                   rows={4}
                   placeholder="Brief description of your business..."
                 />
+              </div>
+            </div>
+
+            {/* Business Address Section */}
+            <div className="border-t pt-6 mt-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-dark-900 font-serif">Business Address</h3>
+                <p className="text-sm text-gray-600 mt-1">Enter your business address details</p>
+              </div>
+
+              <div className="space-y-4">
+                {/* Pincode - First Field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pincode *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={pincode}
+                      onChange={(e) => handlePincodeChange(e.target.value)}
+                      maxLength={6}
+                      className={`w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all ${
+                        pincodeError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
+                      placeholder="Enter 6-digit pincode"
+                      required
+                    />
+                    {loadingPincode && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
+                      </div>
+                    )}
+                  </div>
+                  {pincodeError && (
+                    <p className="mt-1 text-xs text-red-600">{pincodeError}</p>
+                  )}
+                  {pincode.length === 6 && !loadingPincode && !pincodeError && (
+                    <p className="mt-1 text-xs text-green-600">✓ Location details fetched</p>
+                  )}
+                </div>
+
+                {/* Address */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Street Address *
+                  </label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="e.g., 123 Main Street, Building Name"
+                    required
+                  />
+                </div>
+
+                {/* City and State */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                      placeholder="City"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                      placeholder="State"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Country */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Country"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
