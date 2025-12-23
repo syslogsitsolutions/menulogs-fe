@@ -11,6 +11,7 @@ export * from './useMenuItems';
 export * from './useBanners';
 export * from './useFeaturedSections';
 export * from './useSubscription';
+export * from './useFeatureAccess';
 export * from './usePublicMenu';
 export * from './usePaymentMethod';
 

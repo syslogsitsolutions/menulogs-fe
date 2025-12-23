@@ -71,10 +71,19 @@ export function SubscriptionUpgrade({
     try {
       console.log('Creating payment order...', { locationId, plan, billingCycle });
       
+      // Handle CUSTOM plan - redirect to contact sales
+      if (plan === 'CUSTOM') {
+        alert('Please contact our sales team for custom pricing. Redirecting to contact page...');
+        window.open(`${window.location.origin}/contact?plan=CUSTOM&locationId=${locationId}`, '_blank');
+        setProcessing(false);
+        setSelectedPlan(null);
+        return;
+      }
+
       // Create payment order
       const orderResponse = await createOrder.mutateAsync({
         locationId,
-        plan: plan as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+        plan: plan as 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM',
         billingCycle,
       } as CreateOrderRequest);
 
@@ -119,7 +128,7 @@ export function SubscriptionUpgrade({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               locationId,
-              plan: plan as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+              plan: plan as 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM',
               billingCycle,
             });
 
@@ -227,7 +236,7 @@ export function SubscriptionUpgrade({
         >
           Yearly
           <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-            Save 15%
+            Save 17%
           </span>
         </button>
       </div>
@@ -237,6 +246,7 @@ export function SubscriptionUpgrade({
         {plans
           .filter((plan) => plan.id !== 'FREE')
           .map((plan) => {
+            const isCustomPlan = plan.id === 'CUSTOM';
             const price = billingCycle === 'YEARLY' ? (plan.priceYearly ?? plan.price * 12 * 0.85) : plan.price;
             const isCurrentPlan = plan.id === currentPlan;
             const isProcessing = processing && selectedPlan === plan.id;
@@ -294,26 +304,35 @@ export function SubscriptionUpgrade({
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Button clicked for plan:', plan.id);
-                    handleUpgrade(plan.id);
+                    if (isCustomPlan) {
+                      alert('Please contact our sales team for custom pricing.');
+                      window.open(`${window.location.origin}/contact?plan=CUSTOM&locationId=${locationId}`, '_blank');
+                    } else {
+                      handleUpgrade(plan.id);
+                    }
                   }}
-                  disabled={isCurrentPlan || isProcessing || processing || !locationId || !configData?.keyId}
+                  disabled={isCurrentPlan || (isProcessing && !isCustomPlan) || (processing && !isCustomPlan) || (!locationId && !isCustomPlan) || (!configData?.keyId && !isCustomPlan)}
                   className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
                     isCurrentPlan
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : isCustomPlan
+                      ? 'bg-purple-600 text-white hover:bg-purple-700'
                       : plan.id === 'PROFESSIONAL'
                       ? 'bg-blue-600 text-white hover:bg-blue-700'
                       : 'bg-gray-900 text-white hover:bg-gray-800'
-                  } ${(isProcessing || processing) && !isCurrentPlan ? 'opacity-50' : ''} ${
-                    (!locationId || !configData?.keyId) && !isCurrentPlan ? 'opacity-50 cursor-not-allowed' : ''
+                  } ${(isProcessing || processing) && !isCurrentPlan && !isCustomPlan ? 'opacity-50' : ''} ${
+                    (!locationId || !configData?.keyId) && !isCurrentPlan && !isCustomPlan ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isProcessing ? (
+                  {isProcessing && !isCustomPlan ? (
                     <>
                       <Loader className="w-5 h-5 animate-spin" />
                       Processing...
                     </>
                   ) : isCurrentPlan ? (
                     'Current Plan'
+                  ) : isCustomPlan ? (
+                    'Contact Sales'
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />

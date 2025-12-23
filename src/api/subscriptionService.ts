@@ -56,6 +56,16 @@ class SubscriptionService {
     });
     return response.data;
   }
+
+  async getFeatures(plan: string) {
+    const response = await apiClient.get(`/subscriptions/features/${plan}`);
+    return response.data;
+  }
+
+  async checkFeatureAccess(plan: string, feature: string) {
+    const response = await apiClient.get(`/subscriptions/check-feature/${plan}/${feature}`);
+    return response.data;
+  }
 }
 
 export default new SubscriptionService();

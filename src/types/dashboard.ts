@@ -39,7 +39,7 @@ export interface Location {
   openingHours: OpeningHours;
   isActive: boolean;
   subscriptionStatus: 'active' | 'inactive' | 'trial' | 'expired';
-  subscriptionPlan: 'free' | 'starter' | 'professional' | 'enterprise';
+  subscriptionPlan: 'free' | 'standard' | 'professional' | 'custom';
   createdAt: string;
   // Contact page fields
   contactContent?: string;
@@ -168,7 +168,7 @@ export interface Analytics {
 export interface Subscription {
   id: string;
   locationId: string;
-  plan: 'free' | 'starter' | 'professional' | 'enterprise';
+  plan: 'free' | 'standard' | 'professional' | 'custom';
   status: 'active' | 'inactive' | 'trial' | 'expired';
   billingCycle: 'monthly' | 'yearly';
   price: number;

@@ -5,6 +5,7 @@ import { SubscriptionUpgrade } from '../../components/dashboard/SubscriptionUpgr
 import { BillingHistory } from '../../components/dashboard/BillingHistory';
 import { ChangePlanModal } from '../../components/dashboard/ChangePlanModal';
 import { CancelSubscriptionDialog } from '../../components/dashboard/CancelSubscriptionDialog';
+import { UsageDashboard } from '../../components/dashboard/UsageDashboard';
 import { useSubscription, usePaymentMethods } from '@/hooks';
 import { format } from 'date-fns';
 
@@ -35,7 +36,7 @@ const SubscriptionPage = () => {
   // Backend returns uppercase enums, frontend types use lowercase
   const planName = subscription?.plan || currentLocation?.subscriptionPlan || 'FREE';
   const currentPlan = typeof planName === 'string' 
-    ? (planName.toUpperCase() as 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE')
+    ? (planName.toUpperCase() as 'FREE' | 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM')
     : 'FREE';
   
   // Normalize status - backend uses uppercase, frontend may use lowercase
@@ -83,7 +84,7 @@ const SubscriptionPage = () => {
     // Update location in store if subscription changed
     if (subscription && currentLocation) {
       const plan = typeof subscription.plan === 'string' 
-        ? subscription.plan.toLowerCase() as 'free' | 'starter' | 'professional' | 'enterprise'
+        ? subscription.plan.toLowerCase() as 'free' | 'standard' | 'professional' | 'custom'
         : 'free';
       const status = typeof subscription.status === 'string'
         ? subscription.status.toLowerCase() as 'active' | 'inactive' | 'trial' | 'expired'
@@ -158,6 +159,21 @@ const SubscriptionPage = () => {
         </div>
       </div>
 
+      {/* Usage Dashboard */}
+      {currentLocation?.id ? (
+        <UsageDashboard
+          locationId={currentLocation.id}
+          onUpgrade={() => setShowChangePlanModal(true)}
+        />
+      ) : (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <p className="text-yellow-800 font-semibold">Location Required</p>
+          <p className="text-yellow-600 text-sm mt-2">
+            Please select a location to view usage and limits.
+          </p>
+        </div>
+      )}
+
       {/* Plans - Using SubscriptionUpgrade Component */}
       {currentLocation?.id ? (
         <SubscriptionUpgrade
@@ -174,8 +190,8 @@ const SubscriptionPage = () => {
           <p className="text-yellow-600 text-sm mt-2">
             Please select a location to view and upgrade subscription plans.
           </p>
-                </div>
-              )}
+        </div>
+      )}
 
       {/* Payment Method */}
       <div className="grid lg:grid-cols-2 gap-6">

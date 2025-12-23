@@ -76,7 +76,7 @@ export function AddPaymentMethodModal({
       // We use the current location and a minimal plan for order creation
       const orderResponse = await createOrder.mutateAsync({
         locationId: currentLocation.id,
-        plan: 'STARTER', // Minimal plan for order creation
+        plan: 'STANDARD', // Minimal plan for order creation
         billingCycle: 'MONTHLY',
       } as any);
 

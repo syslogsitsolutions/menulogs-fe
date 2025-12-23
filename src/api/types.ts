@@ -196,37 +196,49 @@ export interface FeaturedSectionListResponse {
 // ==================== Subscription ====================
 
 export interface PricingPlan {
-  id: 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+  id: 'FREE' | 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
   name: string;
   description?: string;
   price: number;
   priceYearly?: number;
   interval: 'MONTHLY' | 'YEARLY';
   features: {
-    locations: number;
     menuItems: number;
+    categories: number;
     banners: number;
+    featuredSections: number;
     analytics: string;
     support?: string;
     customDomain?: boolean;
     apiAccess?: boolean;
     whiteLabel?: boolean;
+    multiLanguage?: boolean;
+    menuVersioning?: boolean;
+    abTesting?: boolean;
+    customWorkflows?: boolean;
+    sso?: boolean;
   };
   limits?: {
-    storage?: string;
-    imageUploads?: number;
-    videoUploads?: number;
+    menuItems: number;
+    categories: number;
+    banners: number;
+    featuredSections: number;
+    imageStorageBytes?: number;
+    videoStorageBytes?: number;
+    monthlyImageUploads?: number;
+    monthlyVideoUploads?: number;
+    teamMembers?: number;
   };
 }
 
 export interface CreateSubscriptionRequest {
   locationId: string;
-  plan: 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+  plan: 'FREE' | 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
   billingCycle: 'MONTHLY' | 'YEARLY';
 }
 
 export interface ChangePlanRequest {
-  plan: 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+  plan: 'FREE' | 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
   billingCycle?: 'MONTHLY' | 'YEARLY';
 }
 
@@ -246,18 +258,45 @@ export interface UsageResponse {
   usage: {
     plan: string;
     limits: {
-      locations: number;
       menuItems: number;
+      categories: number;
       banners: number;
-      analytics: string;
+      featuredSections: number;
+      imageStorageBytes: number;
+      videoStorageBytes: number;
+      monthlyImageUploads: number;
+      monthlyVideoUploads: number;
+      teamMembers: number;
     };
     current: {
       menuItems: number;
+      categories: number;
       banners: number;
+      featuredSections: number;
+      storageBytes: number;
+      monthlyImageUploads: number;
+      monthlyVideoUploads: number;
     };
     percentages: {
       menuItems: number;
+      categories: number;
       banners: number;
+      featuredSections: number;
+      storage: number;
+      monthlyImageUploads: number;
+      monthlyVideoUploads: number;
+    };
+    upgradeRecommended: boolean;
+    warnings?: Array<{
+      resource: string;
+      percentage: number;
+      message: string;
+      upgradePlan?: string;
+    }>;
+    gracePeriod?: {
+      isActive: boolean;
+      endsAt?: string;
+      status?: string;
     };
   };
 }
@@ -362,7 +401,7 @@ export interface PaymentConfigResponse {
 
 export interface CreateOrderRequest {
   locationId: string;
-  plan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+  plan: 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
   billingCycle: 'MONTHLY' | 'YEARLY';
 }
 
@@ -394,7 +433,7 @@ export interface VerifyPaymentRequest {
   razorpay_payment_id: string;
   razorpay_signature: string;
   locationId: string;
-  plan: 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE';
+  plan: 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
   billingCycle: 'MONTHLY' | 'YEARLY';
 }
 

@@ -27,9 +27,9 @@ interface ChangePlanModalProps {
 // Plan hierarchy for determining upgrades/downgrades
 const PLAN_HIERARCHY: Record<string, number> = {
   FREE: 0,
-  STARTER: 1,
+  STANDARD: 1,
   PROFESSIONAL: 2,
-  ENTERPRISE: 3,
+  CUSTOM: 3,
 };
 
 export function ChangePlanModal({
@@ -89,7 +89,7 @@ export function ChangePlanModal({
         await changePlan.mutateAsync({
           subscriptionId,
           data: {
-            plan: planId as 'FREE' | 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+            plan: planId as 'FREE' | 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM',
             billingCycle,
           },
         });
@@ -122,10 +122,18 @@ export function ChangePlanModal({
     }
 
     try {
+      // Handle CUSTOM plan
+      if (planId === 'CUSTOM') {
+        alert('Please contact our sales team for custom pricing.');
+        window.open(`${window.location.origin}/contact?plan=CUSTOM&locationId=${locationId}`, '_blank');
+        setSelectedPlan(null);
+        return;
+      }
+
       // Create payment order
       const orderResponse = await createOrder.mutateAsync({
         locationId,
-        plan: planId as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+        plan: planId as 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM',
         billingCycle,
       } as CreateOrderRequest);
 
@@ -154,7 +162,7 @@ export function ChangePlanModal({
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               locationId,
-              plan: planId as 'STARTER' | 'PROFESSIONAL' | 'ENTERPRISE',
+              plan: planId as 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM',
               billingCycle,
             });
 
@@ -248,7 +256,7 @@ export function ChangePlanModal({
             >
               Yearly
               <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                Save 15%
+                Save 17%
               </span>
             </button>
           </div>
