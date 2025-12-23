@@ -6,7 +6,6 @@
 
 import { AlertCircle, TrendingUp, HardDrive, Upload, Users } from 'lucide-react';
 import { useUsage } from '@/hooks/useSubscription';
-import type { UsageResponse } from '@/api/types';
 
 interface UsageDashboardProps {
   locationId: string;

@@ -5,7 +5,7 @@
  * Shows upgrade prompt if feature is not available.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Lock, TrendingUp } from 'lucide-react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { useAuthStore } from '@/store/authStore';
