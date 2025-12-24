@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -14,12 +15,37 @@ import {
   Shield,
   Clock,
   Star,
-  ChefHat
+  ChefHat,
+  X
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 
 const BusinessLandingPage = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Handle smooth scroll for anchor links
+  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault();
+    setMobileMenuOpen(false);
+    const element = document.querySelector(targetId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+  
+  // Close mobile menu when window is resized to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Animation variants
   const fadeInUp = {
     hidden: { opacity: 0, y: 30 },
@@ -42,16 +68,26 @@ const BusinessLandingPage = () => {
       <nav className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md shadow-sm z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2" onClick={() => setMobileMenuOpen(false)}>
               <img src="/logo-full-black.png" alt="MenuLogs" className="h-8 object-cover" />
             </Link>
-            <div className="flex items-center space-x-6">
-              <Link to="#features" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-6">
+              <a 
+                href="#features" 
+                onClick={(e) => handleAnchorClick(e, '#features')}
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors cursor-pointer"
+              >
                 Features
-              </Link>
-              <Link to="#pricing" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+              </a>
+              <a 
+                href="#pricing" 
+                onClick={(e) => handleAnchorClick(e, '#pricing')}
+                className="text-gray-700 hover:text-primary-600 font-medium transition-colors cursor-pointer"
+              >
                 Pricing
-              </Link>
+              </a>
               <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                 Login
               </Link>
@@ -62,7 +98,62 @@ const BusinessLandingPage = () => {
                 Get Started
               </Link>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-gray-200"
+            >
+              <div className="px-4 py-4 space-y-4">
+                <a
+                  href="#features"
+                  onClick={(e) => handleAnchorClick(e, '#features')}
+                  className="block text-gray-700 hover:text-primary-600 font-medium transition-colors py-2 cursor-pointer"
+                >
+                  Features
+                </a>
+                <a
+                  href="#pricing"
+                  onClick={(e) => handleAnchorClick(e, '#pricing')}
+                  className="block text-gray-700 hover:text-primary-600 font-medium transition-colors py-2 cursor-pointer"
+                >
+                  Pricing
+                </a>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-gray-700 hover:text-primary-600 font-medium transition-colors py-2"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-2.5 rounded-full font-medium hover:shadow-lg transition-all duration-300 text-center"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </motion.div>
+          )}
         </div>
       </nav>
 
