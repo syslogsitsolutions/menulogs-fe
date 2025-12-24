@@ -62,7 +62,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen">
       {/* Business CTA Banner */}
-      <div className="bg-gradient-to-r from-primary-500 to-primary-600 py-3 px-4 sm:px-6 lg:px-8">
+      {/* <div className="bg-gradient-to-r from-primary-500 to-primary-600 py-3 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
           <p className="text-white text-sm md:text-base">
             <span className="font-semibold">Restaurant Owner?</span> Transform your menu with MenuLogs
@@ -75,7 +75,7 @@ const LandingPage = () => {
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-      </div>
+      </div> */}
 
       {/* Hero Carousel */}
       {banners && banners.length > 0 && <HeroCarousel banners={banners} />}
@@ -128,7 +128,8 @@ const LandingPage = () => {
             {[
               { number: `${categories.reduce((acc, cat) => acc + ((cat as { menuItems?: MenuItem[] }).menuItems?.length || 0), 0)}+`, label: 'Menu Items' },
               { number: `${categories.length}+`, label: 'Categories' },
-              { number: location.city, label: 'Location' },
+              // { number: location.city, label: 'Location' },
+              // { number: location. || 0, label: 'Outlets' },
               { number: '5★', label: 'Quality Service' }
             ].map((stat, index) => (
               <motion.div

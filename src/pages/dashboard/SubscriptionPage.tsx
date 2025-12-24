@@ -7,12 +7,13 @@ import { ChangePlanModal } from '../../components/dashboard/ChangePlanModal';
 import { CancelSubscriptionDialog } from '../../components/dashboard/CancelSubscriptionDialog';
 import { UsageDashboard } from '../../components/dashboard/UsageDashboard';
 import { useSubscription, usePaymentMethods } from '@/hooks';
-import { format } from 'date-fns';
+import { format, formatDistance } from 'date-fns';
 
 const SubscriptionPage = () => {
   const { currentLocation, updateLocation } = useAuthStore();
   const [showChangePlanModal, setShowChangePlanModal] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
+  console.log(currentLocation);
 
   // Fetch subscription data
   const { 
@@ -128,7 +129,24 @@ const SubscriptionPage = () => {
             {subscriptionStatus.toUpperCase() === 'TRIAL' && (
               <p className="text-sm text-primary-100 mt-2 flex items-center">
                 <AlertCircle className="w-4 h-4 mr-2" />
-                Trial ends in 14 days
+                {currentLocation?.trialEndsAt ? (
+                  <span className="text-sm text-primary-100">
+                    Trial ends in {formatDistance(new Date(currentLocation.trialEndsAt), new Date(), { addSuffix: true })}
+                  </span>
+                ) : (
+                  <span className="text-sm text-primary-100">
+                    N/A
+                  </span>
+                )}
+                {currentLocation?.trialEndsAt ? (
+                  <span className="text-sm text-primary-100">
+                    {format(new Date(currentLocation.trialEndsAt), 'MMM dd, yyyy')}
+                  </span>
+                ) : (
+                  <span className="text-sm text-primary-100">
+                    N/A
+                  </span>
+                )}
               </p>
             )}
           </div>

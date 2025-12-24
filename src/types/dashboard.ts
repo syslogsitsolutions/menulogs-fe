@@ -47,6 +47,8 @@ export interface Location {
   mapEmbedUrl?: string;
   // Brand customization
   brandColor?: string;
+
+  trialEndsAt?: string;
 }
 
 export interface OpeningHours {
