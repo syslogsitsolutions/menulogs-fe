@@ -16,6 +16,11 @@ export { default as paymentService } from './paymentService';
 export { default as paymentMethodService } from './paymentMethodService';
 export { default as qrcodeService } from './qrcodeService';
 
+// Order Management Services
+export { default as orderService } from './orderService';
+export { default as tableService } from './tableService';
+export { default as staffService } from './staffService';
+
 // Export types
 export * from './types';
 
