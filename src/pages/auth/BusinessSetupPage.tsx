@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 import { Building2, Image as ImageIcon, FileText, ArrowRight, Upload, X, MapPin, Loader2 } from 'lucide-react';
 import { useCreateBusiness } from '@/hooks';
 import { fetchPostalCodeData } from '@/utils/postalCode';
+import { useAuthStore } from '@/store/authStore';
 
 const BusinessSetupPage = () => {
   const navigate = useNavigate();
+  const { business } = useAuthStore();
   const { mutate: createBusiness, isPending } = useCreateBusiness();
   const [businessName, setBusinessName] = useState('');
   const [description, setDescription] = useState('');
@@ -21,6 +23,54 @@ const BusinessSetupPage = () => {
   const [country, setCountry] = useState('India');
   const [loadingPincode, setLoadingPincode] = useState(false);
   const [pincodeError, setPincodeError] = useState('');
+
+  // Restore form data from auth store and localStorage
+  // This runs when component mounts or when business is loaded
+  useEffect(() => {
+    // Restore business data from auth store
+    if (business) {
+      // Restore business name and description
+      if (business.name) {
+        setBusinessName(business.name);
+      }
+      if (business.description) {
+        setDescription(business.description);
+      }
+      
+      // Restore logo if it exists and hasn't been manually changed
+      if (business.logo && !logoFile) {
+        // Logo can be a full URL, base64 data URI, or relative path
+        setLogoPreview(business.logo);
+      }
+    }
+
+    // Restore address fields from localStorage (temporary storage during setup)
+    const savedAddress = localStorage.getItem('business-setup-address');
+    if (savedAddress) {
+      try {
+        const addressData = JSON.parse(savedAddress);
+        if (addressData.pincode) setPincode(addressData.pincode);
+        if (addressData.address) setAddress(addressData.address);
+        if (addressData.city) setCity(addressData.city);
+        if (addressData.state) setState(addressData.state);
+        if (addressData.country) setCountry(addressData.country);
+      } catch (error) {
+        console.error('Error parsing saved address data:', error);
+      }
+    }
+  }, [business]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save address fields to localStorage whenever they change
+  useEffect(() => {
+    const addressData = {
+      pincode,
+      address,
+      city,
+      state,
+      country,
+    };
+    localStorage.setItem('business-setup-address', JSON.stringify(addressData));
+  }, [pincode, address, city, state, country]);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

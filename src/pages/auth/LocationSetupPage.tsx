@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { locationService } from '../../api';
 import { useCreateLocation } from '../../hooks';
 import type { OpeningHours } from '../../types/dashboard';
+import { fetchPostalCodeData } from '../../utils/postalCode';
 
 const defaultHours: OpeningHours = {
   monday: { isOpen: true, openTime: '09:00', closeTime: '22:00' },
@@ -30,8 +31,30 @@ const LocationSetupPage = () => {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zipCode, setZipCode] = useState('');
+  const [country, setCountry] = useState('India');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  
+  // Postal code API state
+  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
+
+  // Restore address fields from localStorage (from business setup)
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('business-setup-address');
+    if (savedAddress) {
+      try {
+        const addressData = JSON.parse(savedAddress);
+        if (addressData.address) setAddress(addressData.address);
+        if (addressData.city) setCity(addressData.city);
+        if (addressData.state) setState(addressData.state);
+        if (addressData.pincode) setZipCode(addressData.pincode);
+        if (addressData.country) setCountry(addressData.country);
+      } catch (error) {
+        console.error('Error parsing saved address data:', error);
+      }
+    }
+  }, []);
 
   // Auto-generate slug from name and city
   useEffect(() => {
@@ -40,6 +63,45 @@ const LocationSetupPage = () => {
       setSlug(generatedSlug);
     }
   }, [locationName, city, slugTouched]);
+
+  // Handle postal code change and fetch location data (for Indian pincodes)
+  const handleZipCodeChange = async (value: string) => {
+    const cleanValue = value.replace(/\D/g, ''); // Remove non-digits
+    setZipCode(cleanValue);
+    setPincodeError('');
+
+    // Only fetch if we have 6 digits (try for Indian pincodes)
+    if (cleanValue.length === 6) {
+      setLoadingPincode(true);
+      try {
+        const postalData = await fetchPostalCodeData(cleanValue);
+        if (postalData) {
+          // If successful, auto-set country to India and fill city/state
+          setCountry('India');
+          setCity(postalData.district || postalData.city || city);
+          setState(postalData.state || state);
+          setPincodeError('');
+        } else {
+          // Only show error if country is India, otherwise it might be a non-Indian postal code
+          if (country.toLowerCase() === 'india') {
+            setPincodeError('Invalid pincode. Please enter a valid 6-digit Indian pincode.');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
+        if (country.toLowerCase() === 'india') {
+          setPincodeError('Unable to fetch location details. Please enter manually.');
+        }
+      } finally {
+        setLoadingPincode(false);
+      }
+    } else if (cleanValue.length > 6) {
+      // Prevent entering more than 6 digits for Indian pincodes
+      if (country.toLowerCase() === 'india') {
+        setZipCode(cleanValue.slice(0, 6));
+      }
+    }
+  };
 
   // Check slug availability
   useEffect(() => {
@@ -84,7 +146,7 @@ const LocationSetupPage = () => {
       city: city.trim(),
       state: state.trim(),
       zipCode: zipCode.trim(),
-      country: 'USA',
+      country: country.trim(),
       phone: phone.trim(),
       email: email.trim(),
       openingHours: defaultHours as unknown as Record<string, { isOpen: boolean; openTime: string; closeTime: string }>,
@@ -96,6 +158,8 @@ const LocationSetupPage = () => {
         // Update auth store with the new location
         const { setCurrentLocation } = useAuthStore.getState();
         setCurrentLocation(response.location);
+        // Clear temporary business setup address data from localStorage
+        localStorage.removeItem('business-setup-address');
         navigate('/dashboard');
       },
       onError: (error) => {
@@ -190,9 +254,94 @@ const LocationSetupPage = () => {
               )}
             </div>
 
-            {/* Address */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
+            {/* Address Fields - Arranged as per previous structure */}
+            <div className="space-y-4">
+              {/* Pincode and City */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pincode *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={zipCode}
+                      onChange={(e) => handleZipCodeChange(e.target.value)}
+                      maxLength={6}
+                      className={`w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all ${
+                        pincodeError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
+                      placeholder="Enter 6-digit pincode"
+                      required
+                    />
+                    {loadingPincode && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
+                      </div>
+                    )}
+                  </div>
+                  {pincodeError && (
+                    <p className="mt-1 text-xs text-red-600">{pincodeError}</p>
+                  )}
+                  {zipCode.length === 6 && !loadingPincode && !pincodeError && (
+                    <p className="mt-1 text-xs text-green-600">✓ Location details fetched</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="City"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* State and Country */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    State *
+                  </label>
+                  <input
+                    type="text"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="State"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    value={country}
+                    onChange={(e) => {
+                      const newCountry = e.target.value;
+                      setCountry(newCountry);
+                      // Clear pincode error when country changes
+                      if (newCountry.toLowerCase() !== 'india') {
+                        setPincodeError('');
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Country"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Street Address */}
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address *
                 </label>
@@ -200,47 +349,8 @@ const LocationSetupPage = () => {
                   type="text"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="123 Main Street"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City *
-                </label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="New York"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State *
-                </label>
-                <input
-                  type="text"
-                  value={state}
-                  onChange={(e) => setState(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="NY"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ZIP Code *
-                </label>
-                <input
-                  type="text"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="10001"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  placeholder="e.g., 123 Main Street, Building Name"
                   required
                 />
               </div>

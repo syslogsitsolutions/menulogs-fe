@@ -127,27 +127,21 @@ const SubscriptionPage = () => {
               {currentLocation?.name || 'No location selected'}
             </p>
             {subscriptionStatus.toUpperCase() === 'TRIAL' && (
-              <p className="text-sm text-primary-100 mt-2 flex items-center">
-                <AlertCircle className="w-4 h-4 mr-2" />
+              <div className="text-sm text-primary-100 mt-2 flex items-center">
+                <AlertCircle className="w-4 h-4 mr-2 flex-shrink-0" />
                 {currentLocation?.trialEndsAt ? (
-                  <span className="text-sm text-primary-100">
-                    Trial ends in {formatDistance(new Date(currentLocation.trialEndsAt), new Date(), { addSuffix: true })}
-                  </span>
+                  <div className="flex flex-col">
+                    <span>
+                      Trial ends in {formatDistance(new Date(currentLocation.trialEndsAt), new Date(), { addSuffix: true })}
+                    </span>
+                    <span className="text-xs opacity-90">
+                      ({format(new Date(currentLocation.trialEndsAt), 'MMM dd, yyyy')})
+                    </span>
+                  </div>
                 ) : (
-                  <span className="text-sm text-primary-100">
-                    N/A
-                  </span>
+                  <span>N/A</span>
                 )}
-                {currentLocation?.trialEndsAt ? (
-                  <span className="text-sm text-primary-100">
-                    {format(new Date(currentLocation.trialEndsAt), 'MMM dd, yyyy')}
-                  </span>
-                ) : (
-                  <span className="text-sm text-primary-100">
-                    N/A
-                  </span>
-                )}
-              </p>
+              </div>
             )}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">

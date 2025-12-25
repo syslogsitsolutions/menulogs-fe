@@ -13,6 +13,7 @@ import { parseAPIError, getUserFriendlyErrorMessage } from '@/lib/apiError';
 import { SingleImageUpload } from '@/components/common';
 import type { SingleImageUploadValue } from '@/components/common/SingleImageUpload';
 import { ColorPicker } from '@/components/ui';
+import { fetchPostalCodeData } from '@/utils/postalCode';
 
 const defaultHours: OpeningHours = {
   monday: { isOpen: true, openTime: '09:00', closeTime: '22:00' },
@@ -56,7 +57,7 @@ const LocationFormPage = () => {
     city: '',
     state: '',
     zipCode: '',
-    country: 'USA',
+    country: 'India',
     phone: '',
     email: '',
     isActive: true,
@@ -72,6 +73,10 @@ const LocationFormPage = () => {
   const [slugTouched, setSlugTouched] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [checkingSlug, setCheckingSlug] = useState(false);
+  
+  // Postal code API state
+  const [loadingPincode, setLoadingPincode] = useState(false);
+  const [pincodeError, setPincodeError] = useState('');
   
   // Section expand/collapse state
   const [expandedSections, setExpandedSections] = useState({
@@ -158,6 +163,49 @@ const LocationFormPage = () => {
 
     return () => clearTimeout(timeoutId);
   }, [formData.slug, isEditMode, id]);
+
+  // Handle postal code change and fetch location data (for Indian pincodes)
+  const handleZipCodeChange = async (value: string) => {
+    const cleanValue = value.replace(/\D/g, ''); // Remove non-digits
+    setFormData(prev => ({ ...prev, zipCode: cleanValue }));
+    setPincodeError('');
+
+    // Only fetch if we have 6 digits (try for Indian pincodes)
+    if (cleanValue.length === 6) {
+      setLoadingPincode(true);
+      try {
+        const postalData = await fetchPostalCodeData(cleanValue);
+        if (postalData) {
+          // If successful, auto-set country to India and fill city/state
+          setFormData(prev => ({
+            ...prev,
+            country: 'India',
+            city: postalData.district || postalData.city || prev.city,
+            state: postalData.state || prev.state,
+          }));
+          setPincodeError('');
+        } else {
+          // Only show error if country is India, otherwise it might be a non-Indian postal code
+          if (formData.country.toLowerCase() === 'india') {
+            setPincodeError('Invalid pincode. Please enter a valid 6-digit Indian pincode.');
+          }
+          // Don't clear city/state if user manually entered them
+        }
+      } catch (error) {
+        console.error('Error fetching postal code:', error);
+        if (formData.country.toLowerCase() === 'india') {
+          setPincodeError('Unable to fetch location details. Please enter manually.');
+        }
+      } finally {
+        setLoadingPincode(false);
+      }
+    } else if (cleanValue.length > 6) {
+      // Prevent entering more than 6 digits for Indian pincodes
+      if (formData.country.toLowerCase() === 'india') {
+        setFormData(prev => ({ ...prev, zipCode: cleanValue.slice(0, 6) }));
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -357,8 +405,93 @@ const LocationFormPage = () => {
               )}
             </div>
 
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="md:col-span-2">
+            <div className="space-y-4">
+              {/* Pincode and City */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Pincode *
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="text"
+                      value={formData.zipCode}
+                      onChange={(e) => handleZipCodeChange(e.target.value)}
+                      maxLength={6}
+                      className={`w-full pl-10 pr-10 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all ${
+                        pincodeError ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                      }`}
+                      placeholder="Enter 6-digit pincode"
+                      required
+                    />
+                    {loadingPincode && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="w-5 h-5 animate-spin text-primary-500" />
+                      </div>
+                    )}
+                  </div>
+                  {pincodeError && (
+                    <p className="mt-1 text-xs text-red-600">{pincodeError}</p>
+                  )}
+                  {formData.zipCode.length === 6 && !loadingPincode && !pincodeError && (
+                    <p className="mt-1 text-xs text-green-600">✓ Location details fetched</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    City *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="City"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* State and Country */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    State *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.state}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="State"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.country}
+                    onChange={(e) => {
+                      const newCountry = e.target.value;
+                      setFormData({ ...formData, country: newCountry });
+                      // Clear pincode error when country changes
+                      if (newCountry.toLowerCase() !== 'india') {
+                        setPincodeError('');
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Country"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Street Address */}
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Street Address *
                 </label>
@@ -366,51 +499,14 @@ const LocationFormPage = () => {
                   type="text"
                   value={formData.address}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="123 Main Street"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all"
+                  placeholder="e.g., 123 Main Street, Building Name"
                   required
                 />
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  City *
-                </label>
-                <input
-                  type="text"
-                  value={formData.city}
-                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  State *
-                </label>
-                <input
-                  type="text"
-                  value={formData.state}
-                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ZIP Code *
-                </label>
-                <input
-                  type="text"
-                  value={formData.zipCode}
-                  onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  required
-                />
-              </div>
-
+            <div className="grid md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Phone *
