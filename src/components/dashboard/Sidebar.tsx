@@ -9,7 +9,12 @@ import {
   CreditCard, 
   Settings, 
   Sparkles,
-  X
+  X,
+  ShoppingCart,
+  ClipboardList,
+  ChefHat,
+  LayoutGrid,
+  Users
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -17,16 +22,41 @@ interface SidebarProps {
   onClose: () => void;
 }
 
+interface NavSection {
+  title?: string;
+  items: { path: string; icon: React.ComponentType<{ className?: string }>; label: string; end?: boolean }[];
+}
+
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
-  const navItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+  const navSections: NavSection[] = [
+    {
+      title: 'Orders & POS',
+      items: [
+        { path: '/dashboard/pos', icon: ShoppingCart, label: 'POS' },
+        { path: '/dashboard/orders', icon: ClipboardList, label: 'Orders' },
+        { path: '/dashboard/kitchen', icon: ChefHat, label: 'Kitchen Display' },
+        { path: '/dashboard/tables', icon: LayoutGrid, label: 'Tables' },
+      ]
+    },
+    {
+      title: 'Menu Management',
+      items: [
     { path: '/dashboard/categories', icon: FolderKanban, label: 'Categories' },
     { path: '/dashboard/menu-items', icon: UtensilsCrossed, label: 'Menu Items' },
     { path: '/dashboard/banners', icon: ImagePlus, label: 'Banners' },
     { path: '/dashboard/featured-sections', icon: Sparkles, label: 'Featured Sections' },
+      ]
+    },
+    {
+      title: 'Business',
+      items: [
+        { path: '/dashboard', icon: LayoutDashboard, label: 'Overview', end: true },
     { path: '/dashboard/locations', icon: MapPin, label: 'Locations' },
+        { path: '/dashboard/staff', icon: Users, label: 'Staff' },
     { path: '/dashboard/subscription', icon: CreditCard, label: 'Subscription' },
-    { path: '/dashboard/settings', icon: Settings, label: 'Settings' }
+        { path: '/dashboard/settings', icon: Settings, label: 'Settings' },
+      ]
+    }
   ];
 
   return (
@@ -66,17 +96,25 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-6 px-3">
+        <nav className="flex-1 overflow-y-auto py-4 px-3">
+          {navSections.map((section, sectionIndex) => (
+            <div key={sectionIndex} className="mb-6">
+              {section.title && (
+                <h3 className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {section.title}
+                </h3>
+              )}
           <div className="space-y-1">
-            {navItems.map((item) => {
+                {section.items.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
                   key={item.path}
                   to={item.path}
+                      end={item.end}
                   onClick={() => window.innerWidth < 1024 && onClose()}
                   className={({ isActive }) =>
-                    `flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                        `flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-all duration-200 ${
                       isActive
                         ? 'bg-primary-50 text-primary-700 font-semibold'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-dark-900'
@@ -86,13 +124,15 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
                   {({ isActive }) => (
                     <>
                       <Icon className={`w-5 h-5 ${isActive ? 'text-primary-600' : 'text-gray-400'}`} />
-                      <span>{item.label}</span>
+                          <span className="text-sm">{item.label}</span>
                     </>
                   )}
                 </NavLink>
               );
             })}
           </div>
+            </div>
+          ))}
         </nav>
 
         {/* User Section */}

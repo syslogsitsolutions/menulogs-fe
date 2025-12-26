@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
 
 // Customer-facing pages
@@ -37,6 +38,13 @@ import LocationsPage from './pages/dashboard/LocationsPage';
 import LocationFormPage from './pages/dashboard/LocationFormPage';
 import SubscriptionPage from './pages/dashboard/SubscriptionPage';
 import SettingsPage from './pages/dashboard/SettingsPage';
+
+// POS & Order Management pages
+import POSPage from './pages/dashboard/pos/POSPage';
+import OrdersPage from './pages/dashboard/OrdersPage';
+import KitchenDisplayPage from './pages/dashboard/KitchenDisplayPage';
+import TablesPage from './pages/dashboard/TablesPage';
+import StaffPage from './pages/dashboard/StaffPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -133,6 +141,7 @@ export function DashboardPlaceholder() {
 
 function App() {
   return (
+    <>
     <Routes>
         {/* Authentication Routes (No Header/Footer) */}
         <Route path="/login" element={<LoginPage />} />
@@ -152,12 +161,20 @@ function App() {
           }
         >
           <Route index element={<OverviewPage />} />
+          {/* POS & Order Management */}
+          <Route path="pos" element={<POSPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="kitchen" element={<KitchenDisplayPage />} />
+          <Route path="tables" element={<TablesPage />} />
+          <Route path="staff" element={<StaffPage />} />
+          {/* Menu Management */}
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="menu-items" element={<MenuItemsPage />} />
           <Route path="menu-items/new" element={<MenuItemFormPage />} />
           <Route path="menu-items/:id/edit" element={<MenuItemFormPage />} />
           <Route path="banners" element={<BannersPage />} />
           <Route path="featured-sections" element={<FeaturedSectionsPage />} />
+          {/* Business */}
           <Route path="locations" element={<LocationsPage />} />
           <Route path="locations/new" element={<LocationFormPage />} />
           <Route path="locations/:id/edit" element={<LocationFormPage />} />
@@ -208,6 +225,31 @@ function App() {
         {/* Catch all - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      
+      {/* Toast Notifications */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+    </>
   );
 }
 
