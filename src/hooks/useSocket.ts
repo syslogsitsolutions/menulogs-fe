@@ -56,6 +56,7 @@ export function useSocket(options: UseSocketOptions = {}) {
     socket.on('connect', () => {
       console.log('✅ Socket connected:', socket.id);
       console.log('🔗 Socket transport:', socket.io.engine.transport.name);
+      console.log('🌐 Socket URL:', SOCKET_URL);
       setIsConnected(true);
       setError(null);
 
@@ -64,6 +65,16 @@ export function useSocket(options: UseSocketOptions = {}) {
         console.log(`📍 Joining location: ${locationId}`);
         socket.emit('join-location', locationId);
       }
+    });
+
+    // Monitor transport upgrades/downgrades
+    socket.io.engine.on('upgrade', () => {
+      console.log('⬆️ Transport upgraded to:', socket.io.engine.transport.name);
+    });
+
+    socket.io.engine.on('upgradeError', (error) => {
+      console.error('❌ Transport upgrade error:', error);
+      console.warn('⚠️ Falling back to polling transport');
     });
 
     socket.on('disconnect', (reason) => {
@@ -79,13 +90,31 @@ export function useSocket(options: UseSocketOptions = {}) {
         message: err.message,
         type: (err as any).type,
         description: (err as any).description,
+        transport: socket.io.engine?.transport?.name,
+        url: SOCKET_URL,
       });
+      
+      // Provide more helpful error messages
+      let errorMessage = err.message;
+      if (err.message.includes('CORS') || err.message.includes('Not allowed')) {
+        errorMessage = 'Connection blocked by CORS. Please check server configuration.';
+      } else if (err.message.includes('websocket') || (err as any).type === 'TransportError') {
+        errorMessage = 'WebSocket connection failed. Check if the server supports WebSocket upgrades.';
+      } else if (err.message.includes('Authentication')) {
+        errorMessage = 'Authentication failed. Please log in again.';
+      }
+      
       setIsConnected(false);
-      setError(err.message);
+      setError(errorMessage);
     });
 
     socket.on('error', (err) => {
       console.error('❌ Socket error:', err);
+      console.error('❌ Socket state:', {
+        connected: socket.connected,
+        disconnected: socket.disconnected,
+        transport: socket.io.engine?.transport?.name,
+      });
       setError(err.message || 'Socket error occurred');
     });
 
