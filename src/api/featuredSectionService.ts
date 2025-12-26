@@ -43,10 +43,11 @@ class FeaturedSectionService {
     return response.data;
   }
 
-  async update(id: string, data: Partial<FeaturedSectionRequestWithFile>) {
+  async update(id: string, data: Partial<FeaturedSectionRequestWithFile> & { locationId: string }) {
     // If image is a File, send as FormData
     if (data.image instanceof File) {
       const formData = new FormData();
+      formData.append('locationId', data.locationId);
       if (data.title) formData.append('title', data.title);
       if (data.description !== undefined) {
         formData.append('description', data.description || '');
@@ -79,13 +80,15 @@ class FeaturedSectionService {
     return response.data;
   }
 
-  async delete(id: string) {
-    const response = await apiClient.delete<MessageResponse>(`/featured-sections/${id}`);
+  async delete(id: string, locationId: string) {
+    const response = await apiClient.delete<MessageResponse>(`/featured-sections/${id}`, {
+      data: { locationId },
+    });
     return response.data;
   }
 
-  async toggleActive(id: string) {
-    const response = await apiClient.patch<FeaturedSectionResponse>(`/featured-sections/${id}/toggle`);
+  async toggleActive(id: string, locationId: string) {
+    const response = await apiClient.patch<FeaturedSectionResponse>(`/featured-sections/${id}/toggle`, { locationId });
     return response.data;
   }
 }

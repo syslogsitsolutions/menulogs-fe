@@ -39,10 +39,11 @@ class BannerService {
     return response.data;
   }
 
-  async update(id: string, data: Partial<BannerRequestWithFile>) {
+  async update(id: string, data: Partial<BannerRequestWithFile> & { locationId: string }) {
     // If image is a File, send as FormData
     if (data.image instanceof File) {
       const formData = new FormData();
+      formData.append('locationId', data.locationId);
       if (data.title) formData.append('title', data.title);
       if (data.subtitle !== undefined) {
         formData.append('subtitle', data.subtitle || '');
@@ -65,13 +66,15 @@ class BannerService {
     return response.data;
   }
 
-  async delete(id: string) {
-    const response = await apiClient.delete<MessageResponse>(`/banners/${id}`);
+  async delete(id: string, locationId: string) {
+    const response = await apiClient.delete<MessageResponse>(`/banners/${id}`, {
+      data: { locationId },
+    });
     return response.data;
   }
 
-  async toggleActive(id: string) {
-    const response = await apiClient.patch<BannerResponse>(`/banners/${id}/toggle`);
+  async toggleActive(id: string, locationId: string) {
+    const response = await apiClient.patch<BannerResponse>(`/banners/${id}/toggle`, { locationId });
     return response.data;
   }
 }

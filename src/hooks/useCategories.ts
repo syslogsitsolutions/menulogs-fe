@@ -30,7 +30,7 @@ export const useUpdateCategory = (locationId: string) => {
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CategoryRequestWithFile> }) =>
-      categoryService.update(id, data),
+      categoryService.update(id, { ...data, locationId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories', locationId] });
     },
@@ -41,7 +41,7 @@ export const useDeleteCategory = (locationId: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => categoryService.delete(id),
+    mutationFn: (id: string) => categoryService.delete(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories', locationId] });
       // Also invalidate menu items as they depend on categories
@@ -54,7 +54,7 @@ export const useToggleCategoryVisibility = (locationId: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => categoryService.toggleVisibility(id),
+    mutationFn: (id: string) => categoryService.toggleVisibility(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories', locationId] });
     },

@@ -30,7 +30,7 @@ export const useUpdateFeaturedSection = (locationId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<FeaturedSectionRequestWithFile> }) =>
-      featuredSectionService.update(id, data),
+      featuredSectionService.update(id, { ...data, locationId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['featuredSections', locationId] });
       queryClient.invalidateQueries({ queryKey: ['publicMenu'] });
@@ -41,7 +41,7 @@ export const useUpdateFeaturedSection = (locationId: string) => {
 export const useDeleteFeaturedSection = (locationId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => featuredSectionService.delete(id),
+    mutationFn: (id: string) => featuredSectionService.delete(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['featuredSections', locationId] });
       queryClient.invalidateQueries({ queryKey: ['publicMenu'] });
@@ -52,7 +52,7 @@ export const useDeleteFeaturedSection = (locationId: string) => {
 export const useToggleFeaturedSectionActive = (locationId: string) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => featuredSectionService.toggleActive(id),
+    mutationFn: (id: string) => featuredSectionService.toggleActive(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['featuredSections', locationId] });
       queryClient.invalidateQueries({ queryKey: ['publicMenu'] });

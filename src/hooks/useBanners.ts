@@ -30,7 +30,7 @@ export const useUpdateBanner = (locationId: string) => {
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<BannerRequestWithFile> }) =>
-      bannerService.update(id, data),
+      bannerService.update(id, { ...data, locationId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners', locationId] });
     },
@@ -41,7 +41,7 @@ export const useDeleteBanner = (locationId: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => bannerService.delete(id),
+    mutationFn: (id: string) => bannerService.delete(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners', locationId] });
     },
@@ -52,7 +52,7 @@ export const useToggleBannerActive = (locationId: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => bannerService.toggleActive(id),
+    mutationFn: (id: string) => bannerService.toggleActive(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['banners', locationId] });
     },

@@ -38,10 +38,11 @@ class CategoryService {
     return response.data;
   }
 
-  async update(id: string, data: Partial<CategoryRequestWithFile>) {
+  async update(id: string, data: Partial<CategoryRequestWithFile> & { locationId: string }) {
     // If image is a File, send as FormData
     if (data.image instanceof File) {
       const formData = new FormData();
+      formData.append('locationId', data.locationId);
       if (data.name) formData.append('name', data.name);
       if (data.description !== undefined) {
         formData.append('description', data.description || '');
@@ -63,13 +64,15 @@ class CategoryService {
     return response.data;
   }
 
-  async delete(id: string) {
-    const response = await apiClient.delete<MessageResponse>(`/categories/${id}`);
+  async delete(id: string, locationId: string) {
+    const response = await apiClient.delete<MessageResponse>(`/categories/${id}`, {
+      data: { locationId },
+    });
     return response.data;
   }
 
-  async toggleVisibility(id: string) {
-    const response = await apiClient.patch<CategoryResponse>(`/categories/${id}/visibility`);
+  async toggleVisibility(id: string, locationId: string) {
+    const response = await apiClient.patch<CategoryResponse>(`/categories/${id}/visibility`, { locationId });
     return response.data;
   }
 }
