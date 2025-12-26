@@ -269,18 +269,17 @@ const MenuItemsPage = () => {
                   <div className="flex items-center space-x-2 pt-4 border-t border-gray-100">
                     <button
                       onClick={() => {
-                        const currentAvailability = item.availability.toUpperCase().replace('-', '_') as 'IN_STOCK' | 'OUT_OF_STOCK' | 'HIDDEN';
-                        const newAvailability = currentAvailability === 'IN_STOCK' ? 'OUT_OF_STOCK' : 'IN_STOCK';
+                        const newAvailability = item.availability === 'IN_STOCK' ? 'OUT_OF_STOCK' : 'IN_STOCK';
                         quickUpdateAvailability(item, newAvailability);
                       }}
                       disabled={updateAvailability.isPending}
                       className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                        item.availability.toUpperCase().includes('IN_STOCK') || item.availability === 'in-stock'
+                        item.availability === 'IN_STOCK'
                           ? 'bg-green-50 text-green-700 hover:bg-green-100'
                           : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
                       }`}
                     >
-                      {item.availability.toUpperCase().includes('IN_STOCK') || item.availability === 'in-stock' ? 'In Stock' : 'Out of Stock'}
+                      {item.availability === 'IN_STOCK' ? 'In Stock' : 'Out of Stock'}
                     </button>
                     <button
                       onClick={() => navigate(`/dashboard/menu-items/${item.id}/edit`)}

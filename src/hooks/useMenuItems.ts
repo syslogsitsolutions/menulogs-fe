@@ -36,7 +36,7 @@ export const useUpdateMenuItem = (locationId: string) => {
   
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<MenuItemRequestWithFiles> }) =>
-      menuItemService.update(id, data),
+      menuItemService.update(id, { ...data, locationId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems', locationId] });
     },
@@ -47,7 +47,7 @@ export const useDeleteMenuItem = (locationId: string) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: (id: string) => menuItemService.delete(id),
+    mutationFn: (id: string) => menuItemService.delete(id, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems', locationId] });
     },
@@ -59,7 +59,7 @@ export const useUpdateMenuItemAvailability = (locationId: string) => {
   
   return useMutation({
     mutationFn: ({ id, availability }: { id: string; availability: 'IN_STOCK' | 'OUT_OF_STOCK' | 'HIDDEN' }) =>
-      menuItemService.updateAvailability(id, availability),
+      menuItemService.updateAvailability(id, availability, locationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['menuItems', locationId] });
     },

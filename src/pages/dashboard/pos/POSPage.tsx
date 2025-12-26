@@ -34,6 +34,7 @@ const POSPage = () => {
   // API Hooks
   const { data: categoriesData, isLoading: loadingCategories } = useCategories(locationId);
   const { data: menuItemsData, isLoading: loadingMenuItems } = useMenuItems(locationId);
+  console.log(menuItemsData);
   const { tables, loading: loadingTables, getAvailableTables } = useTables(locationId);  
   const { isConnected } = useOrderSocket(locationId);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -62,7 +63,8 @@ const POSPage = () => {
     return menuItemsData.menuItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.categoryId === selectedCategory;
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const isAvailable = item.availability === 'in-stock';
+      // Backend returns 'IN_STOCK', 'OUT_OF_STOCK', 'HIDDEN' (uppercase with underscores)
+      const isAvailable = item.availability === 'IN_STOCK';
       return matchesCategory && matchesSearch && isAvailable;
     });
   }, [menuItemsData, selectedCategory, searchQuery]);

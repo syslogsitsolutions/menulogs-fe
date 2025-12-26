@@ -87,13 +87,14 @@ class MenuItemService {
     return response.data;
   }
 
-  async update(id: string, data: Partial<MenuItemRequestWithFiles>) {
+  async update(id: string, data: Partial<MenuItemRequestWithFiles> & { locationId: string }) {
     // Check if any images are File objects
     const hasFileImages = data.images?.some((img) => img instanceof File) || data.image instanceof File;
     
     if (hasFileImages) {
       // Send as FormData
       const formData = new FormData();
+      formData.append('locationId', data.locationId);
       if (data.categoryId) formData.append('categoryId', data.categoryId);
       if (data.name) formData.append('name', data.name);
       if (data.description !== undefined) formData.append('description', data.description);
@@ -159,13 +160,18 @@ class MenuItemService {
     return response.data;
   }
 
-  async delete(id: string) {
-    const response = await apiClient.delete<MessageResponse>(`/menu-items/${id}`);
+  async delete(id: string, locationId: string) {
+    const response = await apiClient.delete<MessageResponse>(`/menu-items/${id}`, {
+      data: { locationId },
+    });
     return response.data;
   }
 
-  async updateAvailability(id: string, availability: 'IN_STOCK' | 'OUT_OF_STOCK' | 'HIDDEN') {
-    const response = await apiClient.patch<MenuItemResponse>(`/menu-items/${id}/availability`, { availability });
+  async updateAvailability(id: string, availability: 'IN_STOCK' | 'OUT_OF_STOCK' | 'HIDDEN', locationId: string) {
+    const response = await apiClient.patch<MenuItemResponse>(`/menu-items/${id}/availability`, { 
+      availability,
+      locationId,
+    });
     return response.data;
   }
 }

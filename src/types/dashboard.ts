@@ -104,7 +104,7 @@ export interface DashboardMenuItem {
   isGlutenFree?: boolean;
   spicyLevel?: number;
   preparationTime?: string;
-  availability: 'in-stock' | 'out-of-stock' | 'hidden';
+  availability: 'IN_STOCK' | 'OUT_OF_STOCK' | 'HIDDEN';
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
