@@ -1,19 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Search, 
   Plus, 
   Minus, 
   Trash2, 
-  CreditCard, 
-  Banknote, 
-  Smartphone,
-  X,
   ChefHat,
-  Clock,
-  Users,
   Receipt,
-  Percent,
   MessageSquare,
   Loader2,
   AlertCircle,
@@ -23,7 +16,6 @@ import { useAuthStore } from '../../../store/authStore';
 import { useCategories, useMenuItems, useTables, useOrderSocket } from '../../../hooks';
 import { orderService } from '../../../api';
 import { toast } from 'react-hot-toast';
-import type { Table } from '../../../api/tableService';
 
 interface OrderItem {
   menuItemId: string;
@@ -51,7 +43,6 @@ const POSPage = () => {
   const [orderType, setOrderType] = useState<OrderType>('DINE_IN');
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -71,14 +62,15 @@ const POSPage = () => {
     return menuItemsData.menuItems.filter(item => {
       const matchesCategory = selectedCategory === 'all' || item.categoryId === selectedCategory;
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const isAvailable = item.availability === 'IN_STOCK';
+      const isAvailable = item.availability === 'in-stock';
       return matchesCategory && matchesSearch && isAvailable;
     });
   }, [menuItemsData, selectedCategory, searchQuery]);
 
   // Calculate totals
   const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const taxRate = currentLocation?.taxRate ? Number(currentLocation.taxRate) / 100 : 0.10;
+  // Default tax rate to 10% (Location type doesn't have taxRate property)
+  const taxRate = 0.10;
   const taxAmount = subtotal * taxRate;
   const total = subtotal + taxAmount;
 

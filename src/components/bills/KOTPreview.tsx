@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { Loader2 } from 'lucide-react';
 import type { KOTData } from '../../api/printService';
 import { PrintService } from '../../utils/printService';
 

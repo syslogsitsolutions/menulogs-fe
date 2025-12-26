@@ -27,9 +27,6 @@ const KitchenDisplayPage = () => {
   // Kitchen-specific socket hook
   const { 
     kitchenOrders: socketKitchenOrders, 
-    pendingOrders: socketPendingOrders, 
-    preparingOrders: socketPreparingOrders, 
-    readyOrders: socketReadyOrders,
     isConnected,
     soundEnabled,
     toggleSound 
@@ -406,7 +403,7 @@ interface OrderCardProps {
   order: any;
   bgColor: string;
   borderColor: string;
-  onStatusChange: (orderId: string, status: string) => void;
+  onStatusChange: (orderId: string, status: 'PREPARING' | 'READY' | 'SERVED' | 'COMPLETED') => Promise<void>;
   nextStatus: string;
   nextStatusLabel: string;
   nextStatusColor: string;
@@ -530,7 +527,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </button>
         )}
         <button
-          onClick={() => onStatusChange(order.id, nextStatus)}
+          onClick={() => onStatusChange(order.id, nextStatus as 'PREPARING' | 'READY' | 'SERVED' | 'COMPLETED')}
           disabled={updating}
           className={`flex-1 py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed ${nextStatusColor}`}
         >

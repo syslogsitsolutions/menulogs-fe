@@ -77,8 +77,8 @@ export function useSocket(options: UseSocketOptions = {}) {
       console.error('❌ Socket connection error:', err);
       console.error('❌ Error details:', {
         message: err.message,
-        type: err.type,
-        description: err.description,
+        type: (err as any).type,
+        description: (err as any).description,
       });
       setIsConnected(false);
       setError(err.message);
