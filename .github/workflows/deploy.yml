@@ -32,6 +32,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ github.ref == 'refs/heads/main' && 'https://api.menulogs.in/api/v1' || 'https://api-dev.menulogs.in/api/v1' }}
+          VITE_SOCKET_URL: ${{ github.ref == 'refs/heads/main' && 'wss://api.menulogs.in' || 'wss://api-dev.menulogs.in' }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
