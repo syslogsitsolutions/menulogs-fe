@@ -142,7 +142,7 @@ export function DashboardPlaceholder() {
 function App() {
   return (
     <>
-      <Routes>
+    <Routes>
         {/* Authentication Routes (No Header/Footer) */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />

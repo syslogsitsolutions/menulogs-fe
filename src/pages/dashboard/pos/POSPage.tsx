@@ -309,7 +309,7 @@ const POSPage = () => {
                   />
                 )}
                 <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
-                <p className="text-orange-500 font-bold">${Number(item.price).toFixed(2)}</p>
+                <p className="text-orange-500 font-bold">₹{Number(item.price).toFixed(2)}</p>
                 {item.isVegetarian && (
                   <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-700 text-xs rounded">
                     🌱 Veg
@@ -431,7 +431,7 @@ const POSPage = () => {
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex-1">
                       <h4 className="font-medium text-gray-900">{item.name}</h4>
-                      <p className="text-sm text-gray-500">${item.price.toFixed(2)} each</p>
+                      <p className="text-sm text-gray-500">₹{item.price.toFixed(2)} each</p>
                     </div>
                     <button
                       onClick={() => removeItem(item.menuItemId)}
@@ -458,7 +458,7 @@ const POSPage = () => {
                       </button>
                     </div>
                     <span className="font-semibold text-gray-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -486,15 +486,15 @@ const POSPage = () => {
         <div className="p-4 border-t space-y-2">
           <div className="flex justify-between text-gray-600">
             <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-gray-600">
             <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
-            <span>${taxAmount.toFixed(2)}</span>
+            <span>₹{taxAmount.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
             <span>Total</span>
-            <span>${total.toFixed(2)}</span>
+            <span>₹{total.toFixed(2)}</span>
           </div>
         </div>
 

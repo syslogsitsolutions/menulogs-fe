@@ -20,6 +20,7 @@ export { default as qrcodeService } from './qrcodeService';
 export { default as orderService } from './orderService';
 export { default as tableService } from './tableService';
 export { default as staffService } from './staffService';
+export { printService } from './printService';
 
 // Export types
 export * from './types';

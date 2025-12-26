@@ -13,8 +13,10 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useKitchenSocket } from '../../hooks';
-import { orderService } from '../../api';
+import { orderService, printService } from '../../api';
 import { toast } from 'react-hot-toast';
+import { KOTPreview } from '../../components/bills/KOTPreview';
+import { Printer } from 'lucide-react';
 import type { KitchenOrder } from '../../types/order.types';
 import type { Order as ApiOrder } from '../../api/orderService';
 
@@ -38,6 +40,9 @@ const KitchenDisplayPage = () => {
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [showKOTPreview, setShowKOTPreview] = useState(false);
+  const [kotData, setKOTData] = useState<any>(null);
+  const [loadingKOT, setLoadingKOT] = useState(false);
 
   // Load initial kitchen orders from API
   useEffect(() => {
@@ -48,8 +53,12 @@ const KitchenDisplayPage = () => {
         setLoading(true);
         const orders = await orderService.getKitchenOrders(locationId);
         // Transform API orders to KitchenOrder format
-        const toNumber = (value: number | { toNumber?: () => number } | undefined): number => {
+        const toNumber = (value: number | string | { toNumber?: () => number } | undefined): number => {
           if (typeof value === 'number') return value;
+          if (typeof value === 'string') {
+            const parsed = parseFloat(value);
+            return isNaN(parsed) ? 0 : parsed;
+          }
           if (value && typeof value === 'object' && 'toNumber' in value && typeof value.toNumber === 'function') {
             return value.toNumber();
           }
@@ -158,6 +167,21 @@ const KitchenDisplayPage = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  // Print KOT
+  const handlePrintKOT = async (orderId: string) => {
+    try {
+      setLoadingKOT(true);
+      const kot = await printService.getKOT(orderId);
+      setKOTData(kot);
+      setShowKOTPreview(true);
+    } catch (error: any) {
+      console.error('Failed to load KOT:', error);
+      toast.error(error.response?.data?.error || 'Failed to load KOT');
+    } finally {
+      setLoadingKOT(false);
+    }
+  };
 
   // Update order status
   const handleStatusChange = async (orderId: string, newStatus: 'PREPARING' | 'READY' | 'SERVED' | 'COMPLETED') => {
@@ -271,6 +295,8 @@ const KitchenDisplayPage = () => {
                     nextStatusColor="bg-orange-600 hover:bg-orange-700"
                     updating={updating}
                     getElapsedTime={getElapsedTime}
+                    onPrintKOT={handlePrintKOT}
+                    loadingKOT={loadingKOT}
                   />
                 ))
               ) : (
@@ -299,6 +325,8 @@ const KitchenDisplayPage = () => {
                     nextStatusColor="bg-green-600 hover:bg-green-700"
                     updating={updating}
                     getElapsedTime={getElapsedTime}
+                    onPrintKOT={handlePrintKOT}
+                    loadingKOT={loadingKOT}
                   />
                 ))
               ) : (
@@ -327,6 +355,8 @@ const KitchenDisplayPage = () => {
                     nextStatusColor="bg-purple-600 hover:bg-purple-700"
                     updating={updating}
                     getElapsedTime={getElapsedTime}
+                    onPrintKOT={handlePrintKOT}
+                    loadingKOT={loadingKOT}
                   />
                 ))
               ) : (
@@ -336,6 +366,37 @@ const KitchenDisplayPage = () => {
           </div>
         </div>
       </div>
+
+      {/* KOT Preview Modal */}
+      {showKOTPreview && kotData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900">KOT Preview</h2>
+                <button
+                  onClick={() => {
+                    setShowKOTPreview(false);
+                    setKOTData(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="text-gray-900">
+                <KOTPreview
+                  kotData={kotData}
+                  onClose={() => {
+                    setShowKOTPreview(false);
+                    setKOTData(null);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -351,6 +412,8 @@ interface OrderCardProps {
   nextStatusColor: string;
   updating: boolean;
   getElapsedTime: (createdAt: string) => number;
+  onPrintKOT?: (orderId: string) => void;
+  loadingKOT?: boolean;
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({
@@ -363,6 +426,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
   nextStatusColor,
   updating,
   getElapsedTime,
+  onPrintKOT,
+  loadingKOT = false,
 }) => {
   const elapsedTime = getElapsedTime(order.createdAt);
   const isRush = elapsedTime > 15 || order.isRush;
@@ -378,7 +443,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
     >
       {/* Order Header */}
       <div className="flex items-center justify-between mb-3">
-        <div>
+        <div className="flex-1">
           <h3 className="text-xl font-bold">Order #{order.orderNumber}</h3>
           {order.tableNumber && (
             <p className="text-sm text-gray-400">Table {order.tableNumber}</p>
@@ -390,8 +455,11 @@ const OrderCard: React.FC<OrderCardProps> = ({
             <p className="text-sm text-gray-400">{order.customerName}</p>
           )}
         </div>
-        <div className={`text-right ${isRush ? 'text-red-400' : 'text-gray-400'}`}>
-          <div className="flex items-center gap-1">
+        <div className="text-right ml-4">
+          {order.totalAmount && (
+            <p className="text-lg font-bold text-orange-400 mb-1">₹{order.totalAmount.toFixed(2)}</p>
+          )}
+          <div className={`flex items-center gap-1 ${isRush ? 'text-red-400' : 'text-gray-400'}`}>
             <Clock className="w-4 h-4" />
             <span className="text-lg font-mono">
               {elapsedTime} min
@@ -408,11 +476,18 @@ const OrderCard: React.FC<OrderCardProps> = ({
         {order.items && order.items.map((item: any) => (
           <div key={item.id} className="bg-gray-800/50 rounded p-2">
             <div className="flex justify-between items-start">
-              <div>
-                <span className="font-medium">{item.quantity}x</span>
-                <span className="ml-2">{item.menuItemName}</span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{item.quantity}x</span>
+                  <span>{item.menuItemName}</span>
+                </div>
+                {item.unitPrice && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    ₹{item.unitPrice.toFixed(2)} each • Total: ₹{item.totalPrice?.toFixed(2) || (item.unitPrice * item.quantity).toFixed(2)}
+                  </p>
+                )}
               </div>
-              <span className={`text-xs px-2 py-1 rounded ${
+              <span className={`text-xs px-2 py-1 rounded ml-2 ${
                 item.status === 'PENDING' ? 'bg-yellow-900 text-yellow-300' :
                 item.status === 'PREPARING' ? 'bg-orange-900 text-orange-300' :
                 'bg-green-900 text-green-300'
@@ -436,21 +511,39 @@ const OrderCard: React.FC<OrderCardProps> = ({
         </div>
       )}
 
-      {/* Action Button */}
-      <button
-        onClick={() => onStatusChange(order.id, nextStatus)}
-        disabled={updating}
-        className={`w-full py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed ${nextStatusColor}`}
-      >
-        {updating ? (
-          <span className="flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Updating...
-          </span>
-        ) : (
-          nextStatusLabel
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        {onPrintKOT && (
+          <button
+            onClick={() => onPrintKOT(order.id)}
+            disabled={loadingKOT || updating}
+            className="flex-1 py-2 px-3 bg-gray-700 text-white rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-gray-600 flex items-center justify-center gap-2"
+          >
+            {loadingKOT ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                <Printer className="w-4 h-4" />
+                <span className="hidden sm:inline">Print</span>
+              </>
+            )}
+          </button>
         )}
-      </button>
+        <button
+          onClick={() => onStatusChange(order.id, nextStatus)}
+          disabled={updating}
+          className={`flex-1 py-3 rounded-lg font-semibold transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed ${nextStatusColor}`}
+        >
+          {updating ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Updating...
+            </span>
+          ) : (
+            nextStatusLabel
+          )}
+        </button>
+      </div>
     </motion.div>
   );
 };

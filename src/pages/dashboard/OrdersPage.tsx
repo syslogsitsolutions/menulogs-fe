@@ -11,17 +11,31 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useOrderSocket } from '../../hooks';
-import { orderService } from '../../api';
+import { orderService, printService } from '../../api';
 import { toast } from 'react-hot-toast';
+import { KOTPreview } from '../../components/bills/KOTPreview';
+import { BillPreview } from '../../components/bills/BillPreview';
+import { Printer, FileText } from 'lucide-react';
 import type { Order } from '../../types/order.types';
 import type { Order as ApiOrder } from '../../api/orderService';
 
 // Transform API order to UI order format
 const transformOrder = (apiOrder: ApiOrder): Order => {
-  const toNumber = (value: number | { toNumber?: () => number } | undefined): number => {
+  const toNumber = (value: number | string | { toNumber?: () => number } | undefined): number => {
     if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      if (isNaN(parsed)) {
+        console.warn('⚠️ Failed to parse string to number:', value);
+        return 0;
+      }
+      return parsed;
+    }
     if (value && typeof value === 'object' && 'toNumber' in value && typeof value.toNumber === 'function') {
       return value.toNumber();
+    }
+    if (value !== undefined && value !== null) {
+      console.warn('⚠️ Unexpected value type in toNumber:', typeof value, value);
     }
     return 0;
   };
@@ -75,6 +89,11 @@ const OrdersPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [showKOTPreview, setShowKOTPreview] = useState(false);
+  const [showBillPreview, setShowBillPreview] = useState(false);
+  const [kotData, setKOTData] = useState<any>(null);
+  const [billData, setBillData] = useState<any>(null);
+  const [loadingPrint, setLoadingPrint] = useState(false);
 
   // Load initial orders
   useEffect(() => {
@@ -143,6 +162,8 @@ const OrdersPage = () => {
     });
   }, [allOrders, selectedStatus, searchQuery]);
 
+  console.log('filteredOrders', filteredOrders);
+
   // Update order status
   const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
     try {
@@ -168,6 +189,40 @@ const OrdersPage = () => {
       toast.error(errorMessage);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  // Print KOT
+  const handlePrintKOT = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setLoadingPrint(true);
+      const kot = await printService.getKOT(selectedOrder.id);
+      setKOTData(kot);
+      setShowKOTPreview(true);
+    } catch (error: any) {
+      console.error('Failed to load KOT:', error);
+      toast.error(error.response?.data?.error || 'Failed to load KOT');
+    } finally {
+      setLoadingPrint(false);
+    }
+  };
+
+  // Print Bill
+  const handlePrintBill = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setLoadingPrint(true);
+      const bill = await printService.getBill(selectedOrder.id);
+      setBillData(bill);
+      setShowBillPreview(true);
+    } catch (error: any) {
+      console.error('Failed to load Bill:', error);
+      toast.error(error.response?.data?.error || 'Failed to load Bill');
+    } finally {
+      setLoadingPrint(false);
     }
   };
 
@@ -344,7 +399,7 @@ const OrdersPage = () => {
               <div className="pt-3 border-t flex items-center justify-between">
                 <span className="text-sm text-gray-600">Total</span>
                 <span className="font-bold text-gray-900">
-                  ${order.totalAmount?.toFixed(2) || '0.00'}
+                  ₹{order.totalAmount?.toFixed(2) || '0.00'}
                 </span>
               </div>
 
@@ -466,7 +521,7 @@ const OrdersPage = () => {
                           )}
                         </div>
                         <span className="font-semibold">
-                          ${(item.unitPrice * item.quantity).toFixed(2)}
+                          ₹{(item.unitPrice * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     ))}
@@ -477,15 +532,15 @@ const OrdersPage = () => {
                 <div className="mb-6 space-y-2">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>${selectedOrder.subtotal?.toFixed(2) || '0.00'}</span>
+                    <span>₹{selectedOrder.subtotal?.toFixed(2) || '0.00'}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Tax</span>
-                    <span>${selectedOrder.taxAmount?.toFixed(2) || '0.00'}</span>
+                    <span>₹{selectedOrder.taxAmount?.toFixed(2) || '0.00'}</span>
                   </div>
                   <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
                     <span>Total</span>
-                    <span>${selectedOrder.totalAmount?.toFixed(2) || '0.00'}</span>
+                    <span>₹{selectedOrder.totalAmount?.toFixed(2) || '0.00'}</span>
                   </div>
                 </div>
 
@@ -543,6 +598,48 @@ const OrdersPage = () => {
                   </div>
                 )}
 
+                {/* Print Actions */}
+                <div className="mb-6 flex gap-3">
+                  {(selectedOrder.status === 'CONFIRMED' || selectedOrder.status === 'PREPARING' || selectedOrder.status === 'READY') && (
+                    <button
+                      onClick={handlePrintKOT}
+                      disabled={loadingPrint}
+                      className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:bg-gray-300 flex items-center justify-center gap-2"
+                    >
+                      {loadingPrint ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <Printer className="w-4 h-4" />
+                          Print KOT
+                        </>
+                      )}
+                    </button>
+                  )}
+                  {(selectedOrder.status === 'COMPLETED' || selectedOrder.status === 'SERVED') && (
+                    <button
+                      onClick={handlePrintBill}
+                      disabled={loadingPrint}
+                      className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 flex items-center justify-center gap-2"
+                    >
+                      {loadingPrint ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="w-4 h-4" />
+                          Print Bill
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
                 {/* Actions */}
                 <div className="flex gap-3">
                   {selectedOrder.status !== 'CANCELLED' && selectedOrder.status !== 'COMPLETED' && (
@@ -564,8 +661,100 @@ const OrdersPage = () => {
               </div>
             </motion.div>
           </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+
+        {/* KOT Preview Modal */}
+        <AnimatePresence>
+          {showKOTPreview && kotData && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              onClick={() => {
+                setShowKOTPreview(false);
+                setKOTData(null);
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">KOT Preview</h2>
+                    <button
+                      onClick={() => {
+                        setShowKOTPreview(false);
+                        setKOTData(null);
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <KOTPreview
+                    kotData={kotData}
+                    onClose={() => {
+                      setShowKOTPreview(false);
+                      setKOTData(null);
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Bill Preview Modal */}
+        <AnimatePresence>
+          {showBillPreview && billData && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+              onClick={() => {
+                setShowBillPreview(false);
+                setBillData(null);
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">Bill Preview</h2>
+                    <button
+                      onClick={() => {
+                        setShowBillPreview(false);
+                        setBillData(null);
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <BillPreview
+                    billData={billData}
+                    onClose={() => {
+                      setShowBillPreview(false);
+                      setBillData(null);
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
     </div>
   );
 };
