@@ -268,13 +268,19 @@ const POSPage = () => {
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
-                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
                     selectedCategory === category.id
                       ? 'bg-orange-500 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  {category.icon && <span className="mr-2">{category.icon}</span>}
+                  {'image' in category && category.image && (
+                    <img 
+                      src={category.image} 
+                      alt={category.name}
+                      className="mr-2 w-5 h-5 object-cover rounded"
+                    />
+                  )}
                   {category.name}
                 </button>
               ))

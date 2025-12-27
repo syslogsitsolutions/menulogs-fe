@@ -173,6 +173,22 @@ class AuthService {
     });
     return response.data;
   }
+
+  /**
+   * Send email verification email
+   */
+  async sendVerificationEmail(): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('/auth/send-verification-email', {});
+    return response.data;
+  }
+
+  /**
+   * Verify email using token
+   */
+  async verifyEmail(token: string): Promise<{ message: string }> {
+    const response = await apiClient.post<{ message: string }>('/auth/verify-email', { token });
+    return response.data;
+  }
 }
 
 export default new AuthService();

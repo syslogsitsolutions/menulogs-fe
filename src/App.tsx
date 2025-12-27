@@ -25,6 +25,7 @@ import BusinessSetupPage from './pages/auth/BusinessSetupPage';
 import LocationSetupPage from './pages/auth/LocationSetupPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 
 // Dashboard pages
 import DashboardLayout from './pages/dashboard/DashboardLayout';
@@ -148,6 +149,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/business-setup" element={<BusinessSetupPage />} />
         <Route path="/location-setup" element={<LocationSetupPage />} />
         

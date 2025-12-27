@@ -30,11 +30,13 @@ export const useCreateLocation = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
       
-      // Set as current location if first location
-      const locations = useAuthStore.getState().currentLocation;
-      if (!locations) {
-        useAuthStore.setState({ currentLocation: response.location });
-      }
+      // Update auth store with new location
+      const state = useAuthStore.getState();
+      const updatedLocations = [...(state.locations || []), response.location];
+      useAuthStore.setState({ 
+        locations: updatedLocations,
+        currentLocation: state.currentLocation || response.location
+      });
     },
   });
 };
