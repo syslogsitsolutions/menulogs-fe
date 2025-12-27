@@ -74,7 +74,7 @@ const generateMockMenuItems = (locationId: string): DashboardMenuItem[] => [
     allergens: ['Dairy'],
     tags: ['Popular', 'Premium'],
     isVegetarian: true,
-    availability: 'in-stock',
+    availability: 'IN_STOCK', 
     sortOrder: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
