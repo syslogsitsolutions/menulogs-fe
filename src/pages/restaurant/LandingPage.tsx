@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Loader2, AlertCircle, Star, ExternalLink } from 'lucide-react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import HeroCarousel from '../components/HeroCarousel';
-import CategoryGrid from '../components/CategoryGrid';
-import FeaturedSectionCarousel from '../components/FeaturedSectionCarousel';
-import { usePublicMenuBySlug } from '../hooks/usePublicMenu';
-import type { MenuItem } from '../types/menu';
+import HeroCarousel from '../../components/HeroCarousel';
+import CategoryGrid from '../../components/CategoryGrid';
+import FeaturedSectionCarousel from '../../components/FeaturedSectionCarousel';
+import { usePublicMenuBySlug } from '../../hooks/usePublicMenu';
+import type { MenuItem } from '../../types/menu';
 
 const LandingPage = () => {
   const { slug } = useParams<{ slug: string }>();

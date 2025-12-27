@@ -51,6 +51,19 @@ class PublicService {
     const response = await apiClient.get<ContactPageResponse>(`/public/locations/by-slug/${slug}/contact`);
     return response.data;
   }
+
+  // Contact form submission
+  async submitContactForm(data: {
+    name: string;
+    email: string;
+    company?: string;
+    phone?: string;
+    plan?: 'STANDARD' | 'PROFESSIONAL' | 'CUSTOM';
+    message: string;
+  }) {
+    const response = await apiClient.post<{ success: boolean; message: string }>('/public/contact', data);
+    return response.data;
+  }
 }
 
 export default new PublicService();

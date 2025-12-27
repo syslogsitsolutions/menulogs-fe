@@ -88,6 +88,9 @@ const BusinessLandingPage = () => {
               >
                 Pricing
               </a>
+              <Link to="/contact" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
+                Contact
+              </Link>
               <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">
                 Login
               </Link>
@@ -137,6 +140,13 @@ const BusinessLandingPage = () => {
                 >
                   Pricing
                 </a>
+                <Link
+                  to="/contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block text-gray-700 hover:text-primary-600 font-medium transition-colors py-2"
+                >
+                  Contact
+                </Link>
                 <Link
                   to="/login"
                   onClick={() => setMobileMenuOpen(false)}
@@ -559,54 +569,66 @@ const BusinessLandingPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               {
-                name: 'Starter',
-                price: '₹999',
+                name: 'Standard',
+                price: '₹599',
+                priceUsd: '$6',
                 period: '/month',
-                description: 'Perfect for small restaurants',
+                description: 'Best for single location restaurants',
                 features: [
-                  '1 Location',
-                  '50 Menu Items',
-                  'QR Code Menu',
-                  'Basic Analytics',
-                  'Email Support'
+                  '100 Menu Items',
+                  '20 Categories',
+                  '2 Banners',
+                  '1 Featured Section',
+                  '2 GB Image Storage',
+                  'Email Support',
+                  'QR Code Menu'
                 ],
                 cta: 'Start Free Trial',
-                popular: false
+                popular: false,
+                isCustom: false
               },
               {
                 name: 'Professional',
-                price: '₹2,499',
+                price: '₹999',
+                priceUsd: '$10',
                 period: '/month',
-                description: 'Best for growing businesses',
+                description: 'For growing restaurant chains',
                 features: [
-                  '3 Locations',
-                  'Unlimited Menu Items',
-                  'QR Code Menus',
-                  'Advanced Analytics',
+                  '500 Menu Items',
+                  '50 Categories',
+                  '5 Banners',
+                  '5 Featured Sections',
+                  '10 GB Image Storage',
                   'Priority Support',
-                  'Custom Branding'
+                  'API Access',
+                  // 'Advanced Analytics'
                 ],
                 cta: 'Start Free Trial',
-                popular: true
+                popular: true,
+                isCustom: false
               },
               {
-                name: 'Enterprise',
+                name: 'Custom',
                 price: 'Custom',
+                priceUsd: '',
                 period: '',
-                description: 'For restaurant chains',
+                description: 'Unlimited everything for enterprise chains',
                 features: [
-                  'Unlimited Locations',
-                  'Unlimited Everything',
+                  'Unlimited Menu Items',
+                  'Unlimited Categories',
+                  'Unlimited Storage',
                   'White Label Solution',
                   'Dedicated Support',
                   'Custom Integrations',
+                  'SSO & Advanced Features',
                   'SLA Guarantee'
                 ],
                 cta: 'Contact Sales',
-                popular: false
+                popular: false,
+                isCustom: true
               }
             ].map((plan, index) => (
               <motion.div
@@ -615,53 +637,115 @@ const BusinessLandingPage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`relative bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 ${
-                  plan.popular ? 'ring-4 ring-primary-500 transform scale-105' : ''
+                className={`relative bg-white rounded-xl border-2 p-6 hover:shadow-xl transition-all duration-300 ${
+                  plan.popular 
+                    ? 'border-primary-600 shadow-lg' 
+                    : plan.isCustom
+                    ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-primary-100'
+                    : 'border-gray-200 shadow-sm'
                 }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-primary-500 to-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
-                      Most Popular
+                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                      Popular
+                    </span>
+                  </div>
+                )}
+
+                {plan.isCustom && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <Star className="w-3 h-3" />
+                      Enterprise
                     </span>
                   </div>
                 )}
                 
-                <div className="text-center mb-8">
+                <div className="text-center mb-6">
                   <h3 className="text-2xl font-bold text-dark-900 mb-2 font-serif">
                     {plan.name}
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
-                  <div className="flex items-baseline justify-center">
-                    <span className="text-5xl font-bold text-dark-900 font-serif">
-                      {plan.price}
-                    </span>
-                    <span className="text-gray-600 ml-2">{plan.period}</span>
+                  <div className="flex flex-col items-center">
+                    {plan.isCustom ? (
+                      <span className="text-3xl font-bold text-dark-900 font-serif">
+                        {plan.price}
+                      </span>
+                    ) : (
+                      <>
+                        <div className="flex items-baseline justify-center">
+                          <span className="text-4xl font-bold text-dark-900 font-serif">
+                            {plan.price}
+                          </span>
+                          <span className="text-gray-600 ml-2 text-lg">{plan.period}</span>
+                        </div>
+                        <span className="text-sm text-gray-500 mt-1">
+                          {plan.priceUsd} {plan.period}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                <ul className="space-y-4 mb-8">
+                <ul className="space-y-3 mb-6">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className="flex items-center">
-                      <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
-                      <span className="text-gray-700">{feature}</span>
+                    <li key={i} className="flex items-start gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-700">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <Link
-                  to="/signup"
-                  className={`block text-center py-3 rounded-full font-semibold transition-all duration-300 ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:shadow-lg'
-                      : 'bg-gray-100 text-dark-900 hover:bg-gray-200'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.isCustom ? (
+                  <Link
+                    to="/contact?plan=CUSTOM"
+                    className="block text-center py-3 rounded-lg font-semibold transition-colors bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md"
+                  >
+                    {plan.cta}
+                  </Link>
+                ) : (
+                  <Link
+                    to="/signup"
+                    className={`block text-center py-3 rounded-lg font-semibold transition-colors ${
+                      plan.popular
+                        ? 'bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md'
+                        : 'bg-gray-100 text-dark-900 hover:bg-gray-200'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>
+
+          {/* Additional Info */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="text-center mt-12"
+          >
+            <p className="text-gray-600 mb-4">
+              All plans include a 14-day free trial. No credit card required.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Cancel anytime</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>No setup fees</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>14-day money-back guarantee</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -697,12 +781,12 @@ const BusinessLandingPage = () => {
                 <span>Start Your Free Trial</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <a 
-                href="mailto:sales@menulogs.com" 
+              <Link 
+                to="/contact" 
                 className="inline-flex items-center space-x-2 border-2 border-white text-white px-8 py-4 rounded-full font-medium text-lg hover:bg-white hover:text-dark-900 transition-all duration-300"
               >
                 <span>Contact Sales</span>
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
         </div>

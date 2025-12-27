@@ -2,9 +2,9 @@ import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, ArrowLeft, Leaf, Flame, Loader2, SlidersHorizontal, Grid3x3, List, Star } from 'lucide-react';
-import MenuItemCard from '../components/MenuItemCard';
-import { usePublicCategoryItemsBySlug, usePublicMenuBySlug } from '../hooks/usePublicMenu';
-import type { MenuItem } from '../types/menu';
+import MenuItemCard from '../../components/MenuItemCard';
+import { usePublicCategoryItemsBySlug, usePublicMenuBySlug } from '../../hooks/usePublicMenu';
+import type { MenuItem } from '../../types/menu';
 
 // List View Component for Menu Items
 const MenuItemListItem = ({ item, index, slug }: { item: MenuItem; index: number; slug?: string }) => {

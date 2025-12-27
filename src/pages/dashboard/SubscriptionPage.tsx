@@ -13,8 +13,6 @@ const SubscriptionPage = () => {
   const { currentLocation, updateLocation } = useAuthStore();
   const [showChangePlanModal, setShowChangePlanModal] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
-  console.log(currentLocation);
-
   // Fetch subscription data
   const { 
     data: subscriptionData, 

@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Check, Loader, CreditCard } from 'lucide-react';
+import { Check, Loader, CreditCard, Building2, Sparkles, Headphones, Zap } from 'lucide-react';
 import { usePricingPlans } from '@/hooks/useSubscription';
 import { usePaymentConfig, useCreateOrder, useVerifyPayment } from '@/hooks/usePayment';
 import { createSubscriptionPayment } from '@/lib/razorpay';
@@ -220,7 +220,7 @@ export function SubscriptionUpgrade({
           onClick={() => setBillingCycle('MONTHLY')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             billingCycle === 'MONTHLY'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-primary-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -230,7 +230,7 @@ export function SubscriptionUpgrade({
           onClick={() => setBillingCycle('YEARLY')}
           className={`px-4 py-2 rounded-lg font-medium transition-colors ${
             billingCycle === 'YEARLY'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-primary-600 text-white'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -254,92 +254,178 @@ export function SubscriptionUpgrade({
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-xl border-2 p-6 ${
+                className={`relative rounded-xl border-2 p-6 bg-white ${
                   plan.id === 'PROFESSIONAL'
-                    ? 'border-blue-600 shadow-lg scale-105'
-                    : 'border-gray-200'
+                    ? 'border-primary-600 shadow-lg'
+                    : isCustomPlan
+                    ? 'border-primary-500 shadow-lg bg-gradient-to-br from-primary-50 to-primary-100'
+                    : 'border-gray-200 shadow-sm'
                 } ${isCurrentPlan ? 'opacity-60' : ''}`}
               >
                 {plan.id === 'PROFESSIONAL' && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                       Popular
                     </span>
                   </div>
                 )}
 
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900">{plan.name}</h3>
-                  {plan.description && (
-                    <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
-                  )}
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold text-gray-900">
-                      {configData?.currency === 'INR' ? '₹' : '$'}
-                      {price}
-                    </span>
-                    <span className="text-gray-600">
-                      /{billingCycle === 'YEARLY' ? 'year' : 'month'}
+                {isCustomPlan && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary-600 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      Enterprise
                     </span>
                   </div>
-                </div>
+                )}
 
-                <ul className="space-y-3 mb-6">
-                  {Object.entries(plan.features).map(([key, value]) => (
-                    <li key={key} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-sm text-gray-700">
-                        {typeof value === 'number' && value === -1
-                          ? `Unlimited ${key}`
-                          : typeof value === 'boolean'
-                          ? key.replace(/([A-Z])/g, ' $1').trim()
-                          : `${value} ${key.replace(/([A-Z])/g, ' $1').trim()}`}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {isCustomPlan ? (
+                  // Custom Plan - Contact Sales UI
+                  <>
+                    <div className="text-center mb-6">
+                      <div className="flex justify-center mb-4">
+                        <div className="p-4 bg-primary-100 rounded-full">
+                          <Building2 className="w-8 h-8 text-primary-600" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-dark-900 mb-2">{plan.name}</h3>
+                      <p className="text-base text-gray-700 font-medium">
+                        Tailored Solutions for Growing Restaurant Chains
+                      </p>
+                    </div>
 
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Button clicked for plan:', plan.id);
-                    if (isCustomPlan) {
-                      alert('Please contact our sales team for custom pricing.');
-                      window.open(`${window.location.origin}/contact?plan=CUSTOM&locationId=${locationId}`, '_blank');
-                    } else {
-                      handleUpgrade(plan.id);
-                    }
-                  }}
-                  disabled={isCurrentPlan || (isProcessing && !isCustomPlan) || (processing && !isCustomPlan) || (!locationId && !isCustomPlan) || (!configData?.keyId && !isCustomPlan)}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
-                    isCurrentPlan
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : isCustomPlan
-                      ? 'bg-purple-600 text-white hover:bg-purple-700'
-                      : plan.id === 'PROFESSIONAL'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-900 text-white hover:bg-gray-800'
-                  } ${(isProcessing || processing) && !isCurrentPlan && !isCustomPlan ? 'opacity-50' : ''} ${
-                    (!locationId || !configData?.keyId) && !isCurrentPlan && !isCustomPlan ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {isProcessing && !isCustomPlan ? (
-                    <>
-                      <Loader className="w-5 h-5 animate-spin" />
-                      Processing...
-                    </>
-                  ) : isCurrentPlan ? (
-                    'Current Plan'
-                  ) : isCustomPlan ? (
-                    'Contact Sales'
-                  ) : (
-                    <>
-                      <CreditCard className="w-5 h-5" />
-                      Upgrade Now
-                    </>
-                  )}
-                </button>
+                    <div className="space-y-4 mb-6">
+                      <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-100">
+                        <div className="p-2 bg-primary-100 rounded-lg">
+                          <Zap className="w-5 h-5 text-primary-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-dark-900 text-sm">Unlimited Everything</p>
+                          <p className="text-xs text-gray-600">No limits on menu items, locations, or features</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-100">
+                        <div className="p-2 bg-primary-100 rounded-lg">
+                          <Headphones className="w-5 h-5 text-primary-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-dark-900 text-sm">Dedicated Support</p>
+                          <p className="text-xs text-gray-600">Priority support with dedicated account manager</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-100">
+                        <div className="p-2 bg-primary-100 rounded-lg">
+                          <Sparkles className="w-5 h-5 text-primary-600" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-dark-900 text-sm">Custom Features</p>
+                          <p className="text-xs text-gray-600">White-label, SSO, custom integrations & more</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg p-4 mb-6 text-white text-center">
+                      <p className="text-sm font-semibold mb-1">Flexible Pricing</p>
+                      <p className="text-xs opacity-90">Custom pricing based on your needs</p>
+                    </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Button clicked for plan:', plan.id);
+                        window.open(`${window.location.origin}/contact?plan=CUSTOM&locationId=${locationId}`, '_blank');
+                      }}
+                      className="w-full py-3 px-4 rounded-lg font-semibold transition-colors bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                    >
+                      <Headphones className="w-5 h-5" />
+                      Contact Sales Team
+                    </button>
+                  </>
+                ) : (
+                  // Standard Plans - Regular UI
+                  <>
+                    <div className="text-center mb-6">
+                      <h3 className="text-2xl font-bold text-dark-900">{plan.name}</h3>
+                      {plan.description && (
+                        <p className="text-sm text-gray-600 mt-2">{plan.description}</p>
+                      )}
+                      <div className="mt-4">
+                        <span className="text-4xl font-bold text-dark-900">
+                          {configData?.currency === 'INR' ? '₹' : '$'}
+                          {price}
+                        </span>
+                        <span className="text-gray-600">
+                          /{billingCycle === 'YEARLY' ? 'year' : 'month'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-3 mb-6">
+                      {Object.entries(plan.features)
+                        .filter(([, value]) => {
+                          // Only show features that are enabled/available
+                          if (typeof value === 'boolean') {
+                            return value === true; // Only show true boolean features
+                          }
+                          if (typeof value === 'number') {
+                            return value > 0 || value === -1; // Show positive numbers or unlimited (-1)
+                          }
+                          if (typeof value === 'string') {
+                            return value.length > 0; // Show non-empty strings
+                          }
+                          return false; // Hide undefined/null values
+                        })
+                        .map(([key, value]) => (
+                          <li key={key} className="flex items-start gap-2">
+                            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                            <span className="text-sm text-gray-700">
+                              {typeof value === 'number' && value === -1
+                                ? `Unlimited ${key.replace(/([A-Z])/g, ' $1').trim()}`
+                                : typeof value === 'boolean'
+                                ? key.replace(/([A-Z])/g, ' $1').trim()
+                                : `${value} ${key.replace(/([A-Z])/g, ' $1').trim()}`}
+                            </span>
+                          </li>
+                        ))}
+                    </ul>
+
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Button clicked for plan:', plan.id);
+                        handleUpgrade(plan.id);
+                      }}
+                      disabled={isCurrentPlan || (isProcessing && !isCustomPlan) || (processing && !isCustomPlan) || (!locationId && !isCustomPlan) || (!configData?.keyId && !isCustomPlan)}
+                      className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${
+                        isCurrentPlan
+                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : plan.id === 'PROFESSIONAL'
+                          ? 'bg-primary-600 text-white hover:bg-primary-700'
+                          : 'bg-gray-900 text-white hover:bg-gray-800'
+                      } ${(isProcessing || processing) && !isCurrentPlan ? 'opacity-50' : ''} ${
+                        (!locationId || !configData?.keyId) && !isCurrentPlan ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader className="w-5 h-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : isCurrentPlan ? (
+                        'Current Plan'
+                      ) : (
+                        <>
+                          <CreditCard className="w-5 h-5" />
+                          Upgrade Now
+                        </>
+                      )}
+                    </button>
+                  </>
+                )}
               </div>
             );
           })}

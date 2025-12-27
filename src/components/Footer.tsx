@@ -5,7 +5,9 @@ import { usePublicMenuBySlug } from '../hooks/usePublicMenu';
 const Footer = () => {
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
-  const isPlatformPage = location.pathname === '/' || location.pathname === '/business';
+  // Business/Platform pages: home, business landing, contact, and other business pages
+  const businessPages = ['/', '/business', '/contact', '/login', '/signup', '/privacy-policy', '/terms-and-conditions', '/cookie-policy', '/refund-policy'];
+  const isPlatformPage = businessPages.includes(location.pathname);
   
   // Only fetch business data if we have a slug (hook already handles enabled: !!slug)
   const { data, isLoading } = usePublicMenuBySlug(slug || '');
@@ -14,7 +16,7 @@ const Footer = () => {
   const business = locationData?.business;
 
   // Format opening hours for display
-  const formatHours = (hours: Record<string, any>) => {
+  const formatHours = (hours: Record<string, unknown>) => {
     if (!hours) return null;
     
     const dayNames: Record<string, string> = {
@@ -34,10 +36,11 @@ const Footer = () => {
     const groups: Array<{ days: string[]; hours: string }> = [];
     let currentGroup: { days: string[]; hours: string } | null = null;
 
-    days.forEach(([day, dayHours]: [string, any]) => {
+    days.forEach(([day, dayHours]) => {
       const dayName = dayNames[day] || day;
-      const hoursStr = dayHours?.isOpen 
-        ? `${dayHours.openTime || '09:00'} - ${dayHours.closeTime || '22:00'}`
+      const hoursData = dayHours as { isOpen?: boolean; openTime?: string; closeTime?: string } | null;
+      const hoursStr = hoursData?.isOpen 
+        ? `${hoursData.openTime || '09:00'} - ${hoursData.closeTime || '22:00'}`
         : 'Closed';
 
       if (!currentGroup || currentGroup.hours !== hoursStr) {
@@ -136,6 +139,11 @@ const Footer = () => {
               <h3 className="text-white font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li>
+                  <Link to="/contact" className="text-sm hover:text-brand-500 transition-colors">
+                    Contact Us
+                  </Link>
+                </li>
+                <li>
                   <a href="https://docs.menulogs.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brand-500 transition-colors">
                     Documentation
                   </a>
@@ -143,11 +151,6 @@ const Footer = () => {
                 <li>
                   <a href="https://blog.menulogs.com" target="_blank" rel="noopener noreferrer" className="text-sm hover:text-brand-500 transition-colors">
                     Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="mailto:contact@menulogs.com" className="text-sm hover:text-brand-500 transition-colors">
-                    Contact Us
                   </a>
                 </li>
                 <li>

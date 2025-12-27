@@ -146,6 +146,9 @@ export interface FeaturedSection {
 
 export interface Analytics {
   totalViews: number;
+  totalOrders?: number;
+  totalRevenue?: number;
+  averageOrderValue?: number;
   popularItems: {
     itemId: string;
     itemName: string;
@@ -157,6 +160,8 @@ export interface Analytics {
     categoryName: string;
     views: number;
     items: number;
+    orders?: number;
+    revenue?: number;
   }[];
   recentActivity: {
     id: string;
@@ -169,6 +174,8 @@ export interface Analytics {
     ordersChange: number;
     revenueChange: number;
   };
+  viewsData?: Array<{ name: string; views: number; orders: number }>;
+  categoryOrderData?: Array<{ name: string; orders: number; revenue: number }>;
 }
 
 export interface Subscription {

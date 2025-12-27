@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Eye, ShoppingCart, DollarSign, TrendingUp, 
-  TrendingDown, Clock, Star, Users 
+  TrendingDown, Clock, Star, Users, Loader2
 } from 'lucide-react';
 import { 
   LineChart, Line, BarChart, Bar, XAxis, YAxis, 
@@ -11,27 +11,9 @@ import {
 import { useAuthStore } from '../../store/authStore';
 import { useDashboardStore } from '../../store/dashboardStore';
 
-// Mock chart data
-const viewsData = [
-  { name: 'Mon', views: 400, orders: 24 },
-  { name: 'Tue', views: 300, orders: 13 },
-  { name: 'Wed', views: 500, orders: 28 },
-  { name: 'Thu', views: 450, orders: 39 },
-  { name: 'Fri', views: 700, orders: 48 },
-  { name: 'Sat', views: 900, orders: 62 },
-  { name: 'Sun', views: 800, orders: 55 }
-];
-
-const categoryData = [
-  { name: 'Starters', orders: 65 },
-  { name: 'Mains', orders: 120 },
-  { name: 'Desserts', orders: 45 },
-  { name: 'Drinks', orders: 89 }
-];
-
 const OverviewPage = () => {
   const { currentLocation } = useAuthStore();
-  const { analytics, fetchAnalytics } = useDashboardStore();
+  const { analytics, fetchAnalytics, isLoading } = useDashboardStore();
 
   useEffect(() => {
     if (currentLocation) {
@@ -39,36 +21,100 @@ const OverviewPage = () => {
     }
   }, [currentLocation, fetchAnalytics]);
 
-  const stats = [
-    {
-      label: 'Total Views',
-      value: analytics?.totalViews.toLocaleString() || '0',
-      change: analytics?.periodComparison.viewsChange || 0,
-      icon: Eye,
-      color: 'blue'
-    },
-    {
-      label: 'Orders',
-      value: '542',
-      change: analytics?.periodComparison.ordersChange || 0,
-      icon: ShoppingCart,
-      color: 'green'
-    },
-    {
-      label: 'Revenue',
-      value: '$12,458',
-      change: analytics?.periodComparison.revenueChange || 0,
-      icon: DollarSign,
-      color: 'purple'
-    },
-    {
-      label: 'Avg. Order',
-      value: '$23.00',
-      change: 4.2,
-      icon: TrendingUp,
-      color: 'orange'
+  // Transform analytics data for charts
+  const viewsData = useMemo(() => {
+    if (!analytics?.viewsData || analytics.viewsData.length === 0) {
+      // Return empty array with placeholder if no data
+      return [];
     }
-  ];
+    return analytics.viewsData;
+  }, [analytics]);
+
+  const categoryData = useMemo(() => {
+    if (!analytics?.categoryOrderData || analytics.categoryOrderData.length === 0) {
+      // Fallback to categoryPerformance if categoryOrderData is not available
+      if (!analytics?.categoryPerformance) return [];
+      return analytics.categoryPerformance.map(cat => ({
+        name: cat.categoryName,
+        orders: cat.orders || 0,
+      }));
+    }
+    return analytics.categoryOrderData.map(cat => ({
+      name: cat.name,
+      orders: cat.orders,
+    }));
+  }, [analytics]);
+
+  const stats = useMemo(() => {
+    if (!analytics) {
+      return [
+        {
+          label: 'Total Views',
+          value: '0',
+          change: 0,
+          icon: Eye,
+          color: 'blue'
+        },
+        {
+          label: 'Orders',
+          value: '0',
+          change: 0,
+          icon: ShoppingCart,
+          color: 'green'
+        },
+        {
+          label: 'Revenue',
+          value: '$0',
+          change: 0,
+          icon: DollarSign,
+          color: 'purple'
+        },
+        {
+          label: 'Avg. Order',
+          value: '$0.00',
+          change: 0,
+          icon: TrendingUp,
+          color: 'orange'
+        }
+      ];
+    }
+
+    // Get values from analytics API response
+    const totalOrders = analytics.totalOrders || 0;
+    const totalRevenue = analytics.totalRevenue || 0;
+    const avgOrderValue = analytics.averageOrderValue || 0;
+
+    return [
+      {
+        label: 'Total Views',
+        value: analytics.totalViews.toLocaleString(),
+        change: analytics.periodComparison.viewsChange || 0,
+        icon: Eye,
+        color: 'blue'
+      },
+      {
+        label: 'Orders',
+        value: totalOrders.toLocaleString(),
+        change: analytics.periodComparison.ordersChange || 0,
+        icon: ShoppingCart,
+        color: 'green'
+      },
+      {
+        label: 'Revenue',
+        value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        change: analytics.periodComparison.revenueChange || 0,
+        icon: DollarSign,
+        color: 'purple'
+      },
+      {
+        label: 'Avg. Order',
+        value: `$${avgOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        change: 0,
+        icon: TrendingUp,
+        color: 'orange'
+      }
+    ];
+  }, [analytics]);
 
   return (
     <div className="p-4 lg:p-8 space-y-6">
@@ -126,8 +172,13 @@ const OverviewPage = () => {
           className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
         >
           <h3 className="text-lg font-bold text-dark-900 mb-4">Views & Orders</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={viewsData}>
+          {isLoading || viewsData.length === 0 ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={viewsData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" stroke="#9ca3af" />
               <YAxis stroke="#9ca3af" />
@@ -153,8 +204,9 @@ const OverviewPage = () => {
                 strokeWidth={2} 
                 dot={{ fill: '#10b981', r: 4 }}
               />
-            </LineChart>
-          </ResponsiveContainer>
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
 
         {/* Category Performance */}
@@ -165,8 +217,13 @@ const OverviewPage = () => {
           className="bg-white rounded-xl p-6 shadow-sm border border-gray-200"
         >
           <h3 className="text-lg font-bold text-dark-900 mb-4">Orders by Category</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={categoryData}>
+          {isLoading || categoryData.length === 0 ? (
+            <div className="flex items-center justify-center h-[300px]">
+              <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={categoryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="name" stroke="#9ca3af" />
               <YAxis stroke="#9ca3af" />
@@ -177,9 +234,10 @@ const OverviewPage = () => {
                   borderRadius: '8px' 
                 }} 
               />
-              <Bar dataKey="orders" fill="#f59e0b" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+              <Bar dataKey="orders" fill="#f59e0b" radius={[8, 8, 0, 0]}               />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </motion.div>
       </div>
 
@@ -196,8 +254,13 @@ const OverviewPage = () => {
             <Star className="w-5 h-5 text-yellow-500 mr-2" />
             Popular Items
           </h3>
-          <div className="space-y-3">
-            {analytics?.popularItems.map((item, index) => (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[200px]">
+              <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+            </div>
+          ) : analytics?.popularItems && analytics.popularItems.length > 0 ? (
+            <div className="space-y-3">
+              {analytics.popularItems.map((item, index) => (
               <div key={item.itemId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <div className="flex items-center space-x-3">
                   <span className="font-semibold text-gray-400">#{index + 1}</span>
@@ -213,8 +276,14 @@ const OverviewPage = () => {
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Star className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No popular items data available</p>
+            </div>
+          )}
         </motion.div>
 
         {/* Recent Activity */}
@@ -228,8 +297,13 @@ const OverviewPage = () => {
             <Clock className="w-5 h-5 text-gray-400 mr-2" />
             Recent Activity
           </h3>
-          <div className="space-y-4">
-            {analytics?.recentActivity.map((activity) => (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-[200px]">
+              <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+            </div>
+          ) : analytics?.recentActivity && analytics.recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {analytics.recentActivity.map((activity) => (
               <div key={activity.id} className="flex items-start space-x-3">
                 <div className={`p-2 rounded-lg ${
                   activity.type === 'order' 
@@ -253,8 +327,14 @@ const OverviewPage = () => {
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Clock className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>No recent activity</p>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>

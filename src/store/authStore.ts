@@ -52,7 +52,7 @@ const mockLogin = async (email: string, _password: string): Promise<{ user: User
       state: 'NY',
       zipCode: '10001',
       country: 'USA',
-      phone: '+1 (555) 123-4567',
+      phone: '+91 99999-12345',
       email: 'downtown@restaurant.com',
       openingHours: {
         monday: { isOpen: true, openTime: '11:00', closeTime: '22:00' },

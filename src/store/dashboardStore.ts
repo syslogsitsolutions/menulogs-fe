@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { Category, DashboardMenuItem, Banner, Analytics } from '../types/dashboard';
+import { analyticsService } from '../api';
 
 interface DashboardState {
   categories: Category[];
@@ -253,10 +254,48 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   },
 
   // Analytics
-  fetchAnalytics: async (_locationId: string) => {
+  fetchAnalytics: async (locationId: string) => {
     set({ isLoading: true });
-    await new Promise(resolve => setTimeout(resolve, 500));
-    set({ analytics: generateMockAnalytics(), isLoading: false });
+    try {
+      const analyticsData = await analyticsService.getAnalytics(locationId);
+      
+      // Transform API response to match Analytics interface
+      const analytics: Analytics = {
+        totalViews: analyticsData.totalViews,
+        totalOrders: analyticsData.totalOrders,
+        totalRevenue: analyticsData.totalRevenue,
+        averageOrderValue: analyticsData.averageOrderValue,
+        popularItems: analyticsData.popularItems.map(item => ({
+          itemId: item.itemId,
+          itemName: item.itemName,
+          views: item.views,
+          orders: item.orders,
+        })),
+        categoryPerformance: analyticsData.categoryPerformance.map(cat => ({
+          categoryId: cat.categoryId,
+          categoryName: cat.categoryName,
+          views: cat.views,
+          items: cat.items,
+          orders: cat.orders,
+          revenue: cat.revenue,
+        })),
+        recentActivity: analyticsData.recentActivity.map(activity => ({
+          id: activity.id,
+          type: activity.type,
+          description: activity.description,
+          timestamp: activity.timestamp,
+        })),
+        periodComparison: analyticsData.periodComparison,
+        viewsData: analyticsData.viewsData,
+        categoryOrderData: analyticsData.categoryOrderData,
+      };
+      
+      set({ analytics, isLoading: false });
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      // Fallback to mock data on error
+      set({ analytics: generateMockAnalytics(), isLoading: false });
+    }
   }
 }));
 

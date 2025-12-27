@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Loader2, AlertCircle, ChefHat, Heart, Award } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { publicService } from '../api';
+import { publicService } from '../../api';
 
 const AboutPage = () => {
   const { slug } = useParams<{ slug: string }>();

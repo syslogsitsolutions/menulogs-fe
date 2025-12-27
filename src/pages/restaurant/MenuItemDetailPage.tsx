@@ -5,7 +5,7 @@ import {
   ArrowLeft, Star, Clock, Flame, Leaf, AlertCircle, 
   ChevronLeft, ChevronRight, Play, ShoppingCart, Heart, Loader2
 } from 'lucide-react';
-import { usePublicMenuItem, usePublicCategoryItemsBySlug } from '../hooks/usePublicMenu';
+import { usePublicMenuItem, usePublicCategoryItemsBySlug } from '../../hooks/usePublicMenu';
 
 const MenuItemDetailPage = () => {
   const { slug, itemId } = useParams<{ slug: string; itemId: string }>();

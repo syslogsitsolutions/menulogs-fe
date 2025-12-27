@@ -7,16 +7,17 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import BrandThemeInitializer from './components/BrandThemeInitializer';
 import HomePage from './pages/HomePage';
-import LandingPage from './pages/LandingPage';
+import LandingPage from './pages/restaurant/LandingPage';
 import BusinessLandingPage from './pages/BusinessLandingPage';
-import MenuListingPage from './pages/MenuListingPage';
-import MenuItemDetailPage from './pages/MenuItemDetailPage';
-import AboutPage from './pages/AboutPage';
-import ContactPage from './pages/ContactPage';
-import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
-import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
-import CookiePolicyPage from './pages/CookiePolicyPage';
-import RefundPolicyPage from './pages/RefundPolicyPage';
+import BusinessContactPage from './pages/BusinessContactPage';
+import MenuListingPage from './pages/restaurant/MenuListingPage';
+import MenuItemDetailPage from './pages/restaurant/MenuItemDetailPage';
+import AboutPage from './pages/restaurant/AboutPage';
+import ContactPage from './pages/restaurant/ContactPage';
+import PrivacyPolicyPage from './pages/policy/PrivacyPolicyPage';
+import TermsAndConditionsPage from './pages/policy/TermsAndConditionsPage';
+import CookiePolicyPage from './pages/policy/CookiePolicyPage';
+import RefundPolicyPage from './pages/policy/RefundPolicyPage';
 
 // Auth pages
 import LoginPage from './pages/auth/LoginPage';
@@ -190,6 +191,7 @@ function App() {
         
         {/* Business Landing Page (B2B) */}
         <Route path="/business" element={<BusinessLandingPage />} />
+        <Route path="/contact" element={<BusinessContactPage />} />
         
         {/* Restaurant Menu Routes (slug-based) */}
         <Route path="/:slug" element={

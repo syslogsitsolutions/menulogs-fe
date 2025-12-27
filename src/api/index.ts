@@ -22,6 +22,9 @@ export { default as tableService } from './tableService';
 export { default as staffService } from './staffService';
 export { printService } from './printService';
 
+// Analytics & Reports
+export { default as analyticsService } from './analyticsService';
+
 // Export types
 export * from './types';
 
