@@ -47,6 +47,8 @@ export interface Location {
   mapEmbedUrl?: string;
   // Brand customization
   brandColor?: string;
+  // Location settings
+  enableOrders?: boolean;
 
   trialEndsAt?: string;
 }

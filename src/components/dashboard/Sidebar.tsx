@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Users
 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -28,8 +29,14 @@ interface NavSection {
 }
 
 const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
+  const { currentLocation } = useAuthStore();
+  
+  // Check if orders are enabled for current location (default to true if not set)
+  const ordersEnabled = currentLocation?.enableOrders ?? true;
+
   const navSections: NavSection[] = [
-    {
+    // Only show Orders & POS section if orders are enabled
+    ...(ordersEnabled ? [{
       title: 'Orders & POS',
       items: [
         { path: '/dashboard/pos', icon: ShoppingCart, label: 'POS' },
@@ -37,7 +44,7 @@ const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
         { path: '/dashboard/kitchen', icon: ChefHat, label: 'Kitchen Display' },
         { path: '/dashboard/tables', icon: LayoutGrid, label: 'Tables' },
       ]
-    },
+    }] : []),
     {
       title: 'Menu Management',
       items: [

@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Loader2, AlertCircle, Clock, 
-  MapPin, Mail, CheckCircle, ChevronDown, ChevronUp
+  MapPin, Mail, CheckCircle, ChevronDown, ChevronUp, Settings
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useLocations, useCreateLocation, useUpdateLocation } from '@/hooks';
@@ -66,7 +66,8 @@ const LocationFormPage = () => {
     contactImage: '',
     contactImageFile: undefined as File | undefined,
     mapEmbedUrl: '',
-    brandColor: '#ee6620'
+    brandColor: '#ee6620',
+    enableOrders: true
   });
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -84,6 +85,7 @@ const LocationFormPage = () => {
     openingHours: true,
     contactPage: true,
     brandCustomization: true,
+    locationSettings: true,
   });
   
   const toggleSection = (section: keyof typeof expandedSections) => {
@@ -128,7 +130,8 @@ const LocationFormPage = () => {
         contactImage: location.contactImage || '',
         contactImageFile: undefined,
         mapEmbedUrl: location.mapEmbedUrl || '',
-        brandColor: location.brandColor || '#ee6620'
+        brandColor: location.brandColor || '#ee6620',
+        enableOrders: location.enableOrders ?? true
       });
       setSlugTouched(true); // Slug is already set in edit mode
     }
@@ -238,7 +241,8 @@ const LocationFormPage = () => {
       contactContent: formData.contactContent?.trim() || undefined,
       contactImage: formData.contactImageFile || formData.contactImage?.trim() || undefined,
       mapEmbedUrl: formData.mapEmbedUrl?.trim() || undefined,
-      brandColor: formData.brandColor || undefined
+      brandColor: formData.brandColor || undefined,
+      enableOrders: formData.enableOrders
     };
 
     if (isEditMode) {
@@ -748,6 +752,74 @@ const LocationFormPage = () => {
                 value={formData.brandColor}
                 onChange={(color) => setFormData({ ...formData, brandColor: color })}
               />
+            </div>
+          )}
+        </motion.div>
+
+        {/* Location Settings Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+        >
+          <button
+            type="button"
+            onClick={() => toggleSection('locationSettings')}
+            className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-primary-100 rounded-lg">
+                <Settings className="w-5 h-5 text-primary-600" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-xl font-bold text-dark-900 font-serif">Location Settings</h3>
+                <p className="text-sm text-gray-600 mt-0.5">Manage location-specific features and settings</p>
+              </div>
+            </div>
+            {expandedSections.locationSettings ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
+          {expandedSections.locationSettings && (
+            <div className="px-6 pb-6 space-y-5">
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  Configure location-specific settings. These settings will only affect this location.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 border border-gray-200 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-dark-900 mb-1">Order Management</h4>
+                      <p className="text-sm text-gray-600 mb-3">
+                        Enable or disable the order management module for this location. When disabled, the order section will be hidden from the sidebar and order-related features will be unavailable.
+                      </p>
+                      <label className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.enableOrders}
+                          onChange={(e) => setFormData({ ...formData, enableOrders: e.target.checked })}
+                          className="w-5 h-5 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">
+                          {formData.enableOrders ? 'Orders Enabled' : 'Orders Disabled'}
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-500">
+                  More location settings will be available in future updates.
+                </p>
+              </div>
             </div>
           )}
         </motion.div>
