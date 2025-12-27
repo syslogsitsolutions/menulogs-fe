@@ -45,6 +45,7 @@ export interface Location {
   contactContent?: string;
   contactImage?: string;
   mapEmbedUrl?: string;
+  googleReviewUrl?: string;
   // Brand customization
   brandColor?: string;
   // Location settings

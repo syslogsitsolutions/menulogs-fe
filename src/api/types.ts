@@ -84,6 +84,7 @@ export interface LocationRequest {
   contactContent?: string;
   contactImage?: string;
   mapEmbedUrl?: string;
+  googleReviewUrl?: string;
   // Brand customization
   brandColor?: string;
 }
@@ -327,6 +328,8 @@ export interface PublicMenuResponse {
     email: string;
     openingHours: Record<string, unknown>;
     brandColor?: string;
+    mapEmbedUrl?: string;
+    googleReviewUrl?: string;
     business: {
       name: string;
       logo: string;

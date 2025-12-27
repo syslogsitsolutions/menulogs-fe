@@ -34,6 +34,7 @@ class LocationService {
       if (data.contactContent) formData.append('contactContent', data.contactContent);
       formData.append('contactImage', data.contactImage);
       if (data.mapEmbedUrl) formData.append('mapEmbedUrl', data.mapEmbedUrl);
+      if (data.googleReviewUrl) formData.append('googleReviewUrl', data.googleReviewUrl);
 
       const response = await apiClient.post<LocationResponse>('/locations', formData, {
         headers: {
@@ -70,6 +71,7 @@ class LocationService {
       if (data.contactContent !== undefined) formData.append('contactContent', data.contactContent || '');
       formData.append('contactImage', data.contactImage);
       if (data.mapEmbedUrl !== undefined) formData.append('mapEmbedUrl', data.mapEmbedUrl || '');
+      if (data.googleReviewUrl !== undefined) formData.append('googleReviewUrl', data.googleReviewUrl || '');
       if (data.brandColor) formData.append('brandColor', data.brandColor);
 
       const response = await apiClient.put<LocationResponse>(`/locations/${id}`, formData, {

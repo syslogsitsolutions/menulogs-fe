@@ -66,6 +66,7 @@ const LocationFormPage = () => {
     contactImage: '',
     contactImageFile: undefined as File | undefined,
     mapEmbedUrl: '',
+    googleReviewUrl: '',
     brandColor: '#ee6620',
     enableOrders: true
   });
@@ -130,6 +131,7 @@ const LocationFormPage = () => {
         contactImage: location.contactImage || '',
         contactImageFile: undefined,
         mapEmbedUrl: location.mapEmbedUrl || '',
+        googleReviewUrl: location.googleReviewUrl || '',
         brandColor: location.brandColor || '#ee6620',
         enableOrders: location.enableOrders ?? true
       });
@@ -241,6 +243,7 @@ const LocationFormPage = () => {
       contactContent: formData.contactContent?.trim() || undefined,
       contactImage: formData.contactImageFile || formData.contactImage?.trim() || undefined,
       mapEmbedUrl: formData.mapEmbedUrl?.trim() || undefined,
+      googleReviewUrl: formData.googleReviewUrl?.trim() || undefined,
       brandColor: formData.brandColor || undefined,
       enableOrders: formData.enableOrders
     };
@@ -707,6 +710,24 @@ const LocationFormPage = () => {
               />
               <p className="mt-1 text-xs text-gray-500">
                 Get embed URL from Google Maps: Share → Embed a map → Copy HTML src URL
+              </p>
+            </div>
+
+            {/* Google Review URL */}
+            <div>
+              <label htmlFor="googleReviewUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                Google Review URL
+              </label>
+              <input
+                type="url"
+                id="googleReviewUrl"
+                value={formData.googleReviewUrl}
+                onChange={(e) => setFormData({ ...formData, googleReviewUrl: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                placeholder="https://www.google.com/maps/place/..."
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Direct link to your Google Business Profile where customers can leave reviews
               </p>
             </div>
             </div>
