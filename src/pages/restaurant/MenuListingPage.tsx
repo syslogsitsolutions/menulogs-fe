@@ -458,10 +458,10 @@ const MenuListingPage = () => {
                         <div className="bg-gray-50 rounded-xl p-3 sm:p-4 border border-gray-200">
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-semibold text-gray-700">
-                              ${priceRange[0].toFixed(0)}
+                            ₹{priceRange[0].toFixed(0)}
                             </span>
                             <span className="text-lg font-bold text-brand-600">
-                              ${priceRange[1].toFixed(0)}
+                            ₹{priceRange[1].toFixed(0)}
                             </span>
                           </div>
                           <input
