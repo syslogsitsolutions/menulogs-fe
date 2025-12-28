@@ -10,7 +10,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useOrderSocket, useQZTray } from '../../hooks';
+import { useOrderSocket } from '../../hooks';
 import { orderService, printService } from '../../api';
 import { toast } from 'react-hot-toast';
 import { KOTPreview } from '../../components/bills/KOTPreview';
@@ -81,9 +81,6 @@ const OrdersPage = () => {
 
   // Socket.IO for real-time updates
   const { orders: socketOrders, isConnected } = useOrderSocket(locationId);
-
-  // QZ Tray status
-  const qzTrayStatus = useQZTray();
 
   // Local state
   const [localOrders, setLocalOrders] = useState<Order[]>([]);
@@ -301,13 +298,6 @@ const OrdersPage = () => {
                 : 'bg-red-100 text-red-700'
             }`}>
               {isConnected ? '🟢 Live' : '🔴 Offline'}
-            </div>
-            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              qzTrayStatus.isConnected 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'bg-gray-100 text-gray-600'
-            }`} title={qzTrayStatus.isConnected ? `QZ Tray: ${qzTrayStatus.defaultPrinter || 'Connected'}` : 'QZ Tray: Not connected (PDF fallback)'}>
-              {qzTrayStatus.isConnected ? '🖨️ QZ Tray' : '📄 PDF Mode'}
             </div>
             <button
               onClick={() => window.location.reload()}

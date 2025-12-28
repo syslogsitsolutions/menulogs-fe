@@ -1,38 +1,17 @@
 /**
  * Print Service Utility
  * Handles PDF generation and printing for KOT and Bills
- * Supports QZ Tray for direct printing with PDF fallback
  */
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { KOTData, BillData } from '../api/printService';
-import { QZTrayService } from './qzTrayService';
 
 export class PrintService {
   /**
-   * Print KOT - tries QZ Tray first, falls back to PDF download
+   * Generate and download KOT as PDF
    */
-  static async printKOT(kotData: KOTData, printerName?: string): Promise<void> {
-    // Try QZ Tray first
-    try {
-      const isQZAvailable = await QZTrayService.isAvailable();
-      if (isQZAvailable) {
-        await QZTrayService.printKOT(kotData, printerName);
-        return; // Successfully printed via QZ Tray
-      }
-    } catch (error) {
-      console.warn('QZ Tray printing failed, falling back to PDF:', error);
-    }
-
-    // Fallback to PDF download
-    await this.printKOTAsPDF(kotData);
-  }
-
-  /**
-   * Generate and download KOT as PDF (fallback method)
-   */
-  private static async printKOTAsPDF(kotData: KOTData): Promise<void> {
+  static async printKOT(kotData: KOTData): Promise<void> {
     try {
       // Create a temporary container for KOT content
       const container = document.createElement('div');
@@ -103,28 +82,9 @@ export class PrintService {
   }
 
   /**
-   * Print Bill - tries QZ Tray first, falls back to PDF download
+   * Generate and download Bill as PDF
    */
-  static async printBill(billData: BillData, printerName?: string): Promise<void> {
-    // Try QZ Tray first
-    try {
-      const isQZAvailable = await QZTrayService.isAvailable();
-      if (isQZAvailable) {
-        await QZTrayService.printBill(billData, printerName);
-        return; // Successfully printed via QZ Tray
-      }
-    } catch (error) {
-      console.warn('QZ Tray printing failed, falling back to PDF:', error);
-    }
-
-    // Fallback to PDF download
-    await this.printBillAsPDF(billData);
-  }
-
-  /**
-   * Generate and download Bill as PDF (fallback method)
-   */
-  private static async printBillAsPDF(billData: BillData): Promise<void> {
+  static async printBill(billData: BillData): Promise<void> {
     try {
       // Create a temporary container for Bill content
       const container = document.createElement('div');

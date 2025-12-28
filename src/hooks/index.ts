@@ -41,8 +41,5 @@ export { useKitchenSocket } from './useKitchenSocket';
 export { useTables } from './useTables';
 export { useStaff } from './useStaff';
 
-// Print hooks
-export { useQZTray } from './useQZTray';
-
 // Re-export types
 export type { Order, KitchenOrder, OrderStatusChangedData } from '../types/order.types';
