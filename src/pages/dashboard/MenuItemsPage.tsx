@@ -12,8 +12,9 @@ import { parseAPIError, getUserFriendlyErrorMessage } from '@/lib/apiError';
 
 const MenuItemsPage = () => {
   const navigate = useNavigate();
-  const { currentLocation } = useAuthStore();
+  const { currentLocation, business } = useAuthStore();
   const locationId = currentLocation?.id || '';
+  const restaurantLogo = business?.logo || null;
 
   // React Query hooks
   const { data: categoriesData } = useCategories(locationId);
@@ -222,7 +223,7 @@ const MenuItemsPage = () => {
           )}
         </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {menuItems.map((item, index) => {
             const category = categories.find(c => c.id === item.categoryId);
             
@@ -235,17 +236,50 @@ const MenuItemsPage = () => {
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-md transition-all"
               >
                 {/* Image */}
-                <div className="relative h-48 bg-gray-100">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-3 left-3">
+                <div className={`relative h-48 overflow-hidden ${!item.image && restaurantLogo ? 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50' : 'bg-gray-100'}`}>
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : restaurantLogo ? (
+                    <div className="relative w-full h-full flex items-center justify-center p-4">
+                      {/* Restaurant Logo with Grayscale Filter */}
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <img
+                          src={restaurantLogo}
+                          alt="Restaurant Logo"
+                          className="max-w-[60%] max-h-[60%] w-auto h-auto object-contain grayscale opacity-60 transition-opacity duration-300"
+                          style={{ filter: 'grayscale(100%)' }}
+                        />
+                      </div>
+                      {/* Subtle overlay for additional depth */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-400/10 to-transparent pointer-events-none"></div>
+                      {/* Image Not Available Badge */}
+                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-sm border border-gray-200/50 z-10">
+                        <p className="text-[10px] text-gray-600 font-medium whitespace-nowrap">
+                          Image not available
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center p-4">
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm mb-2 shadow-sm">
+                          <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-[10px] text-gray-600 font-medium">Image not available</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="absolute top-3 left-3 z-10">
                     {getAvailabilityBadge(item.availability)}
                   </div>
-                  <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full shadow-lg">
-                    <span className="font-bold text-primary-600">${item.price}</span>
+                  <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full shadow-lg z-10">
+                    <span className="font-bold text-primary-600">₹{item.price}</span>
                   </div>
                 </div>
 

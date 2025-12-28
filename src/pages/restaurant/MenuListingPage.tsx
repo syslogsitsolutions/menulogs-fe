@@ -7,7 +7,7 @@ import { usePublicCategoryItemsBySlug, usePublicMenuBySlug } from '../../hooks/u
 import type { MenuItem } from '../../types/menu';
 
 // List View Component for Menu Items
-const MenuItemListItem = ({ item, index, slug }: { item: MenuItem; index: number; slug?: string }) => {
+const MenuItemListItem = ({ item, index, slug, restaurantLogo }: { item: MenuItem; index: number; slug?: string; restaurantLogo?: string | null }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -17,6 +17,10 @@ const MenuItemListItem = ({ item, index, slug }: { item: MenuItem; index: number
       navigate(`/item/${item.id}`);
     }
   };
+
+  // Determine which image to display
+  const displayImage = item.image || restaurantLogo;
+  const isRestaurantLogo = !item.image && restaurantLogo;
 
   return (
     <motion.div
@@ -28,13 +32,54 @@ const MenuItemListItem = ({ item, index, slug }: { item: MenuItem; index: number
     >
       <div className="flex flex-col sm:flex-row">
         {/* Image Container */}
-        <div className="relative w-full sm:w-32 md:w-40 h-40 sm:h-32 md:h-36 flex-shrink-0 overflow-hidden">
-          <img 
-            src={item.image} 
-            alt={item.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        <div className={`relative w-full sm:w-32 md:w-40 h-40 sm:h-32 md:h-36 flex-shrink-0 overflow-hidden ${isRestaurantLogo ? 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50' : ''}`}>
+          {displayImage ? (
+            <>
+              {isRestaurantLogo ? (
+                <div className="relative w-full h-full flex flex-col items-center justify-center p-3 sm:p-4">
+                  {/* Restaurant Logo with Grayscale Filter */}
+                  <div className="relative flex-1 w-full flex items-center justify-center">
+                    <div className="relative">
+                      <img 
+                        src={displayImage} 
+                        alt="Restaurant Logo"
+                        className="max-w-full max-h-[70%] object-contain drop-shadow-sm grayscale opacity-60 transition-opacity duration-300"
+                        style={{ filter: 'grayscale(100%)' }}
+                      />
+                      {/* Subtle overlay for additional depth */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-400/20 to-transparent pointer-events-none"></div>
+                    </div>
+                  </div>
+                  {/* Image Not Available Badge */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm border border-gray-200/50">
+                    <p className="text-[9px] sm:text-[10px] text-gray-600 font-medium whitespace-nowrap">
+                      Image not available
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <img 
+                    src={displayImage} 
+                    alt={item.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-dark-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100 flex items-center justify-center">
+              <div className="text-center p-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm mb-2 shadow-sm">
+                  <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <p className="text-[10px] text-gray-600 font-medium">Image not available</p>
+              </div>
+            </div>
+          )}
           
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-wrap gap-1">
@@ -129,6 +174,7 @@ const MenuListingPage = () => {
   const categoryItems = useMemo(() => category?.menuItems || [], [category?.menuItems]);
   const location = data?.location;
   const allCategories = menuData?.categories || [];
+  const restaurantLogo = menuData?.location?.business?.logo || null;
 
   const maxPrice = useMemo(() => {
     if (categoryItems.length > 0) {
@@ -501,9 +547,9 @@ const MenuListingPage = () => {
                   transition={{ duration: 0.2, delay: index * 0.02 }}
                 >
                   {viewMode === 'grid' ? (
-                    <MenuItemCard item={item} index={index} slug={slug} />
+                    <MenuItemCard item={item} index={index} slug={slug} restaurantLogo={restaurantLogo} />
                   ) : (
-                    <MenuItemListItem item={item} index={index} slug={slug} />
+                    <MenuItemListItem item={item} index={index} slug={slug} restaurantLogo={restaurantLogo} />
                   )}
                 </motion.div>
               ))}
