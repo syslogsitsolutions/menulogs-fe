@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft, Loader2, AlertCircle, X, Plus, 
-  DollarSign, Clock, Flame
+  Clock, Flame,
+  IndianRupee
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useCategories } from '@/hooks';
@@ -322,7 +323,7 @@ const MenuItemFormPage = () => {
                 Price *
               </label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="number"
                   value={formData.price}
