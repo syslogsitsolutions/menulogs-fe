@@ -1,157 +1,271 @@
 /**
  * Print Service Utility
  * Handles PDF generation and printing for KOT and Bills
+ * Supports direct printing via Print Service or PDF download fallback
  */
 
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { KOTData, BillData } from '../api/printService';
+import { directPrintService } from '../services/directPrintService';
 
 export class PrintService {
   /**
-   * Generate and download KOT as PDF
+   * Generate and print KOT
+   * Uses direct print service if available, otherwise downloads PDF
    */
   static async printKOT(kotData: KOTData): Promise<void> {
     try {
-      // Create a temporary container for KOT content
-      const container = document.createElement('div');
-      container.id = 'kot-print-container';
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.width = '80mm'; // Thermal printer width
-      container.style.padding = '10mm';
-      container.style.backgroundColor = 'white';
-      container.style.fontFamily = 'monospace';
-      container.style.fontSize = '12px';
-      container.style.lineHeight = '1.4';
-
-      // Build KOT HTML content
-      container.innerHTML = this.generateKOTHTML(kotData);
-
-      // Append to body temporarily
-      document.body.appendChild(container);
-
-      // Wait for content to render
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Convert to canvas
-      const canvas = await html2canvas(container, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        width: 300, // 80mm ≈ 300px at 96 DPI
-        backgroundColor: '#ffffff',
-      });
-
-      // Remove temporary container
-      document.body.removeChild(container);
-
-      // Create PDF (80mm width, auto height)
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [80, 200], // Thermal printer size
-      });
-
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 80; // mm
-      const pageHeight = 200; // mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Generate PDF as base64
+      const pdfBase64 = await this.generateKOTPDFBase64(kotData);
+      
+      // Check if direct print service is available
+      const isDirectAvailable = await directPrintService.checkAvailability();
+      
+      if (isDirectAvailable) {
+        // Use direct printing
+        console.log('🖨️  Using direct print service for KOT');
+        await directPrintService.printKOT(kotData.order.id, pdfBase64);
+      } else {
+        // Fallback to PDF download
+        console.log('📥 Print service not available, downloading PDF');
+        await this.downloadKOTPDF(kotData, pdfBase64);
       }
-
-      // Auto-download PDF
-      pdf.save(`KOT-${kotData.order.orderNumber}.pdf`);
     } catch (error) {
-      console.error('Failed to generate KOT PDF:', error);
-      throw error;
+      console.error('Failed to print KOT:', error);
+      // If direct print fails, try PDF download as fallback
+      try {
+        const pdfBase64 = await this.generateKOTPDFBase64(kotData);
+        await this.downloadKOTPDF(kotData, pdfBase64);
+      } catch (fallbackError) {
+        console.error('PDF fallback also failed:', fallbackError);
+        throw error; // Throw original error
+      }
     }
   }
 
   /**
-   * Generate and download Bill as PDF
+   * Generate KOT PDF as base64 string
+   */
+  private static async generateKOTPDFBase64(kotData: KOTData): Promise<string> {
+    // Create a temporary container for KOT content
+    const container = document.createElement('div');
+    container.id = 'kot-print-container';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.width = '80mm';
+    container.style.padding = '10mm';
+    container.style.backgroundColor = 'white';
+    container.style.fontFamily = 'monospace';
+    container.style.fontSize = '12px';
+    container.style.lineHeight = '1.4';
+
+    // Build KOT HTML content
+    container.innerHTML = this.generateKOTHTML(kotData);
+
+    // Append to body temporarily
+    document.body.appendChild(container);
+
+    // Wait for content to render
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Convert to canvas
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      width: 300,
+      backgroundColor: '#ffffff',
+    });
+
+    // Remove temporary container
+    document.body.removeChild(container);
+
+    // Create PDF
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 200],
+    });
+
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 80;
+    const pageHeight = 200;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Add first page
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Add additional pages if needed
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    // Return as base64 (remove data:application/pdf;base64, prefix)
+    const base64 = pdf.output('datauristring');
+    return base64.split(',')[1]; // Return only the base64 part
+  }
+
+  /**
+   * Download KOT PDF
+   */
+  private static async downloadKOTPDF(kotData: KOTData, pdfBase64: string): Promise<void> {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 200],
+    });
+    
+    // Reconstruct PDF from base64
+    const binaryString = atob(pdfBase64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    // Load PDF and save
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `KOT-${kotData.order.orderNumber}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
+   * Generate and print Bill
+   * Uses direct print service if available, otherwise downloads PDF
    */
   static async printBill(billData: BillData): Promise<void> {
     try {
-      // Create a temporary container for Bill content
-      const container = document.createElement('div');
-      container.id = 'bill-print-container';
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.width = '80mm'; // Standard receipt width (thermal printer)
-      container.style.padding = '10mm';
-      container.style.backgroundColor = 'white';
-      container.style.fontFamily = 'monospace';
-      container.style.fontSize = '11px';
-      container.style.lineHeight = '1.4';
+      // Generate PDF as base64
+      const pdfBase64 = await this.generateBillPDFBase64(billData);
+      
+      // Check if direct print service is available
+      const isDirectAvailable = await directPrintService.checkAvailability();
+      
+      if (isDirectAvailable) {
+        // Use direct printing
+        console.log('🖨️  Using direct print service for Bill');
+        await directPrintService.printBill(billData.order.id, pdfBase64);
+      } else {
+        // Fallback to PDF download
+        console.log('📥 Print service not available, downloading PDF');
+        await this.downloadBillPDF(billData, pdfBase64);
+      }
+    } catch (error) {
+      console.error('Failed to print Bill:', error);
+      // If direct print fails, try PDF download as fallback
+      try {
+        const pdfBase64 = await this.generateBillPDFBase64(billData);
+        await this.downloadBillPDF(billData, pdfBase64);
+      } catch (fallbackError) {
+        console.error('PDF fallback also failed:', fallbackError);
+        throw error; // Throw original error
+      }
+    }
+  }
 
-      // Build Bill HTML content
-      container.innerHTML = this.generateBillHTML(billData);
+  /**
+   * Generate Bill PDF as base64 string
+   */
+  private static async generateBillPDFBase64(billData: BillData): Promise<string> {
+    // Create a temporary container for Bill content
+    const container = document.createElement('div');
+    container.id = 'bill-print-container';
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.width = '80mm';
+    container.style.padding = '10mm';
+    container.style.backgroundColor = 'white';
+    container.style.fontFamily = 'monospace';
+    container.style.fontSize = '11px';
+    container.style.lineHeight = '1.4';
 
-      // Append to body temporarily
-      document.body.appendChild(container);
+    // Build Bill HTML content
+    container.innerHTML = this.generateBillHTML(billData);
 
-      // Wait for content to render
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    // Append to body temporarily
+    document.body.appendChild(container);
 
-      // Convert to canvas
-      const canvas = await html2canvas(container, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        width: 300, // 80mm ≈ 300px at 96 DPI
-        backgroundColor: '#ffffff',
-      });
+    // Wait for content to render
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // Remove temporary container
-      document.body.removeChild(container);
+    // Convert to canvas
+    const canvas = await html2canvas(container, {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      width: 300,
+      backgroundColor: '#ffffff',
+    });
 
-      // Create PDF (80mm width, auto height)
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: [80, 200], // Thermal printer size
-      });
+    // Remove temporary container
+    document.body.removeChild(container);
 
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 80; // Standard receipt width in mm
-      const pageHeight = 200; // mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
+    // Create PDF
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 200],
+    });
 
-      let position = 0;
+    const imgData = canvas.toDataURL('image/png');
+    const imgWidth = 80;
+    const pageHeight = 200;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-      // Add first page
+    // Add first page
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Add additional pages if needed
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight;
+      pdf.addPage();
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
-
-      // Add additional pages if needed
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      // Auto-download PDF
-      pdf.save(`Bill-${billData.order.orderNumber}.pdf`);
-    } catch (error) {
-      console.error('Failed to generate Bill PDF:', error);
-      throw error;
     }
+
+    // Return as base64 (remove data:application/pdf;base64, prefix)
+    const base64 = pdf.output('datauristring');
+    return base64.split(',')[1]; // Return only the base64 part
+  }
+
+  /**
+   * Download Bill PDF
+   */
+  private static async downloadBillPDF(billData: BillData, pdfBase64: string): Promise<void> {
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [80, 200],
+    });
+    
+    // Reconstruct PDF from base64
+    const binaryString = atob(pdfBase64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    
+    // Load PDF and save
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Bill-${billData.order.orderNumber}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   /**

@@ -18,6 +18,7 @@ import { BillPreview } from '../../components/bills/BillPreview';
 import { Printer, FileText } from 'lucide-react';
 import type { Order } from '../../types/order.types';
 import type { Order as ApiOrder } from '../../api/orderService';
+import { directPrintService } from '../../services/directPrintService';
 
 // Transform API order to UI order format
 const transformOrder = (apiOrder: ApiOrder): Order => {
@@ -94,6 +95,25 @@ const OrdersPage = () => {
   const [kotData, setKOTData] = useState<any>(null);
   const [billData, setBillData] = useState<any>(null);
   const [loadingPrint, setLoadingPrint] = useState(false);
+  const [printServiceConnected, setPrintServiceConnected] = useState(false);
+
+  // Connect to print service
+  useEffect(() => {
+    // Connect to print service on mount
+    directPrintService.connect().then(connected => {
+      setPrintServiceConnected(connected);
+    });
+    
+    // Listen for connection changes
+    const unsubscribe = directPrintService.onConnectionChange((connected) => {
+      setPrintServiceConnected(connected);
+    });
+    
+    return () => {
+      unsubscribe();
+      // Don't disconnect - keep connection alive
+    };
+  }, []);
 
   // Load initial orders
   useEffect(() => {
@@ -298,6 +318,13 @@ const OrdersPage = () => {
                 : 'bg-red-100 text-red-700'
             }`}>
               {isConnected ? '🟢 Live' : '🔴 Offline'}
+            </div>
+            <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+              printServiceConnected 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-yellow-100 text-yellow-700'
+            }`}>
+              {printServiceConnected ? '🖨️ Print Service' : '📥 PDF Download'}
             </div>
             <button
               onClick={() => window.location.reload()}
