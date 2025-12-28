@@ -12,7 +12,7 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  image: string;
+  image?: string;
   images: string[];
   video?: string;
   ingredients: string[];

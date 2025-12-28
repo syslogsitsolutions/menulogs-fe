@@ -44,85 +44,85 @@ export function BillPreview({ billData, onClose, autoPrint = false }: BillPrevie
       <div
         ref={containerRef}
         id="bill-print-container"
-        className="absolute left-[-9999px] bg-white p-8"
+        className="absolute left-[-9999px] bg-white p-4"
         style={{
-          width: '210mm',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '12px',
-          lineHeight: '1.6',
+          width: '80mm',
+          fontFamily: 'monospace',
+          fontSize: '11px',
+          lineHeight: '1.4',
         }}
       >
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           {business.logo && (
             <img
               src={business.logo}
               alt={business.name}
-              className="max-w-[150px] mx-auto mb-4"
+              className="max-w-[60px] mx-auto mb-2"
             />
           )}
-          <h1 className="text-2xl font-bold mb-2">{business.name}</h1>
-          <p className="text-sm mb-1">{location.name}</p>
-          <p className="text-xs">{location.address}</p>
-          <p className="text-xs">
+          <h1 className="text-base font-bold mb-1">{business.name}</h1>
+          <p className="text-xs mb-0.5">{location.name}</p>
+          <p className="text-[10px]">{location.address}</p>
+          <p className="text-[10px]">
             {location.city}, {location.state} {location.zipCode}
           </p>
-          <p className="text-xs">Phone: {location.phone}</p>
-          {location.email && <p className="text-xs">Email: {location.email}</p>}
+          <p className="text-[10px]">Phone: {location.phone}</p>
+          {location.email && <p className="text-[10px]">Email: {location.email}</p>}
         </div>
 
-        <hr className="border-t-2 border-gray-800 my-6" />
+        <hr className="border-t border-gray-800 my-2" />
 
         {/* Order Info */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-3">Invoice #{order.orderNumber}</h2>
-          <p className="mb-1"><strong>Date:</strong> {date}</p>
+        <div className="mb-3">
+          <h2 className="text-sm font-bold mb-1">Invoice #{order.orderNumber}</h2>
+          <p className="text-[10px] mb-0.5"><strong>Date:</strong> {date}</p>
           {completedDate && (
-            <p className="mb-1"><strong>Completed:</strong> {completedDate}</p>
+            <p className="text-[10px] mb-0.5"><strong>Completed:</strong> {completedDate}</p>
           )}
           {order.table && (
-            <p className="mb-1">
+            <p className="text-[10px] mb-0.5">
               <strong>Table:</strong> {order.table.number}
               {order.table.name && ` (${order.table.name})`}
             </p>
           )}
-          <p className="mb-1"><strong>Type:</strong> {order.type.replace('_', ' ')}</p>
+          <p className="text-[10px] mb-0.5"><strong>Type:</strong> {order.type.replace('_', ' ')}</p>
           {order.customerName && (
-            <p className="mb-1"><strong>Customer:</strong> {order.customerName}</p>
+            <p className="text-[10px] mb-0.5"><strong>Customer:</strong> {order.customerName}</p>
           )}
           {order.customerPhone && (
-            <p className="mb-1"><strong>Phone:</strong> {order.customerPhone}</p>
+            <p className="text-[10px] mb-0.5"><strong>Phone:</strong> {order.customerPhone}</p>
           )}
           {order.customerEmail && (
-            <p className="mb-1"><strong>Email:</strong> {order.customerEmail}</p>
+            <p className="text-[10px] mb-0.5"><strong>Email:</strong> {order.customerEmail}</p>
           )}
         </div>
 
-        <hr className="border-t border-gray-400 my-6" />
+        <hr className="border-t border-gray-400 my-2" />
 
         {/* Items Table */}
-        <div className="mb-6">
-          <table className="w-full border-collapse">
+        <div className="mb-3">
+          <table className="w-full border-collapse text-[10px]">
             <thead>
-              <tr className="bg-gray-100">
-                <th className="text-left border-b-2 border-gray-800 py-2 px-2">Item</th>
-                <th className="text-center border-b-2 border-gray-800 py-2 px-2">Qty</th>
-                <th className="text-right border-b-2 border-gray-800 py-2 px-2">Price</th>
-                <th className="text-right border-b-2 border-gray-800 py-2 px-2">Total</th>
+              <tr>
+                <th className="text-left border-b border-gray-800 py-1 px-1">Item</th>
+                <th className="text-center border-b border-gray-800 py-1 px-1">Qty</th>
+                <th className="text-right border-b border-gray-800 py-1 px-1">Price</th>
+                <th className="text-right border-b border-gray-800 py-1 px-1">Total</th>
               </tr>
             </thead>
             <tbody>
               {order.items.map((item) => (
                 <tr key={item.id} className="border-b border-gray-200">
-                  <td className="py-2 px-2">
-                    <strong>{item.menuItemName}</strong>
+                  <td className="py-1 px-1">
+                    <strong className="text-[10px]">{item.menuItemName}</strong>
                     {item.notes && (
-                      <div className="text-xs text-gray-600 italic mt-1">{item.notes}</div>
+                      <div className="text-[9px] text-gray-600 italic mt-0.5">{item.notes}</div>
                     )}
                   </td>
-                  <td className="text-center py-2 px-2">{item.quantity}</td>
-                  <td className="text-right py-2 px-2">₹{item.unitPrice.toFixed(2)}</td>
-                  <td className="text-right py-2 px-2">₹{item.totalPrice.toFixed(2)}</td>
+                  <td className="text-center py-1 px-1 text-[10px]">{item.quantity}</td>
+                  <td className="text-right py-1 px-1 text-[10px]">₹{item.unitPrice.toFixed(2)}</td>
+                  <td className="text-right py-1 px-1 text-[10px]">₹{item.totalPrice.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -130,34 +130,34 @@ export function BillPreview({ billData, onClose, autoPrint = false }: BillPrevie
         </div>
 
         {/* Totals */}
-        <div className="ml-auto w-[300px]">
-          <table className="w-full border-collapse">
+        <div className="w-full mb-3">
+          <table className="w-full border-collapse text-[10px]">
             <tbody>
               <tr>
-                <td className="py-1 text-right"><strong>Subtotal:</strong></td>
-                <td className="py-1 text-right">₹{order.subtotal.toFixed(2)}</td>
+                <td className="py-0.5 text-right"><strong>Subtotal:</strong></td>
+                <td className="py-0.5 text-right">₹{order.subtotal.toFixed(2)}</td>
               </tr>
               {order.taxRate > 0 && (
                 <tr>
-                  <td className="py-1 text-right">Tax ({order.taxRate}%):</td>
-                  <td className="py-1 text-right">₹{order.taxAmount.toFixed(2)}</td>
+                  <td className="py-0.5 text-right">Tax ({order.taxRate}%):</td>
+                  <td className="py-0.5 text-right">₹{order.taxAmount.toFixed(2)}</td>
                 </tr>
               )}
               {order.discountAmount > 0 && (
                 <tr>
-                  <td className="py-1 text-right">Discount:</td>
-                  <td className="py-1 text-right">-₹{order.discountAmount.toFixed(2)}</td>
+                  <td className="py-0.5 text-right">Discount:</td>
+                  <td className="py-0.5 text-right">-₹{order.discountAmount.toFixed(2)}</td>
                 </tr>
               )}
               {order.tipAmount > 0 && (
                 <tr>
-                  <td className="py-1 text-right">Tip:</td>
-                  <td className="py-1 text-right">₹{order.tipAmount.toFixed(2)}</td>
+                  <td className="py-0.5 text-right">Tip:</td>
+                  <td className="py-0.5 text-right">₹{order.tipAmount.toFixed(2)}</td>
                 </tr>
               )}
-              <tr className="border-t-2 border-gray-800">
-                <td className="py-2 text-right"><strong>Total:</strong></td>
-                <td className="py-2 text-right"><strong>₹{order.totalAmount.toFixed(2)}</strong></td>
+              <tr className="border-t border-gray-800">
+                <td className="py-1 text-right"><strong>Total:</strong></td>
+                <td className="py-1 text-right"><strong>₹{order.totalAmount.toFixed(2)}</strong></td>
               </tr>
             </tbody>
           </table>
@@ -165,16 +165,16 @@ export function BillPreview({ billData, onClose, autoPrint = false }: BillPrevie
 
         {/* Payments */}
         {payments.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-base font-bold mb-3">Payment Details</h3>
-            <table className="w-full border-collapse">
+          <div className="mt-3 mb-3">
+            <h3 className="text-xs font-bold mb-1">Payment Details</h3>
+            <table className="w-full border-collapse text-[10px]">
               <tbody>
                 {payments.map((payment) => (
                   <tr key={payment.id}>
-                    <td className="py-1">{payment.method.toUpperCase()}</td>
-                    <td className="py-1 text-right">₹{payment.amount.toFixed(2)}</td>
+                    <td className="py-0.5">{payment.method.toUpperCase()}</td>
+                    <td className="py-0.5 text-right">₹{payment.amount.toFixed(2)}</td>
                     {payment.transactionId && (
-                      <td className="py-1 text-xs text-gray-600">
+                      <td className="py-0.5 text-[9px] text-gray-600">
                         Txn: {payment.transactionId}
                       </td>
                     )}
@@ -185,13 +185,13 @@ export function BillPreview({ billData, onClose, autoPrint = false }: BillPrevie
           </div>
         )}
 
-        <hr className="border-t border-gray-400 my-8" />
+        <hr className="border-t border-gray-400 my-3" />
 
         {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm font-bold mb-2">Thank you for your visit!</p>
+        <div className="text-center mt-3">
+          <p className="text-xs font-bold mb-1">Thank you for your visit!</p>
           {order.notes && (
-            <p className="text-xs text-gray-600">{order.notes}</p>
+            <p className="text-[10px] text-gray-600">{order.notes}</p>
           )}
         </div>
       </div>

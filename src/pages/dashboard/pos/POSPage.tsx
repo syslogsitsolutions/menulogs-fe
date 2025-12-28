@@ -28,8 +28,9 @@ interface OrderItem {
 type OrderType = 'DINE_IN' | 'TAKEAWAY';
 
 const POSPage = () => {
-  const { currentLocation } = useAuthStore();
+  const { currentLocation, business } = useAuthStore();
   const locationId = currentLocation?.id || '';
+  const restaurantLogo = business?.logo || null;
 
   // API Hooks
   const { data: categoriesData, isLoading: loadingCategories } = useCategories(locationId);
@@ -301,13 +302,46 @@ const POSPage = () => {
                 whileTap={{ scale: 0.98 }}
                 className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 text-left"
               >
-                {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-32 object-cover rounded-lg mb-3"
-                  />
-                )}
+                <div className={`relative w-full h-32 rounded-lg mb-3 overflow-hidden ${!item.image && restaurantLogo ? 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50' : 'bg-gray-100'}`}>
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : restaurantLogo ? (
+                    <div className="relative w-full h-full flex flex-col items-center justify-center p-3">
+                      {/* Restaurant Logo with Grayscale Filter */}
+                      <div className="relative flex-1 w-full flex items-center justify-center">
+                        <div className="relative">
+                          <img
+                            src={restaurantLogo}
+                            alt="Restaurant Logo"
+                            className="max-w-full max-h-[70%] object-contain drop-shadow-sm grayscale opacity-60 transition-opacity duration-300"
+                            style={{ filter: 'grayscale(100%)' }}
+                          />
+                          {/* Subtle overlay for additional depth */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-gray-400/20 to-transparent pointer-events-none"></div>
+                        </div>
+                      </div>
+                      {/* Image Not Available Badge */}
+                      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-full shadow-sm border border-gray-200/50">
+                        <p className="text-[8px] text-gray-600 font-medium whitespace-nowrap">
+                          No image
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-center p-2">
+                        <svg className="w-8 h-8 mx-auto text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-[8px] text-gray-600 font-medium">No image</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <h3 className="font-semibold text-gray-900 mb-1">{item.name}</h3>
                 <p className="text-orange-500 font-bold">₹{Number(item.price).toFixed(2)}</p>
                 {item.isVegetarian && (

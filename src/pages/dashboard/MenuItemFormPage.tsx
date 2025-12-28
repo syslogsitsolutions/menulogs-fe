@@ -120,11 +120,6 @@ const MenuItemFormPage = () => {
       return;
     }
 
-    if (!formData.images || formData.images.length === 0) {
-      setErrorMessage('At least one image is required');
-      return;
-    }
-
     if (formData.price <= 0) {
       setErrorMessage('Price must be greater than 0');
       return;
@@ -133,20 +128,20 @@ const MenuItemFormPage = () => {
     setErrorMessage(null);
 
     // Ensure main image is at index 0 and both image and images fields are set for backward compatibility
-    const imagesArray = formData.images.slice(0, 3); // Max 3 images
+    const imagesArray = (formData.images || []).slice(0, 3); // Max 3 images
     const mainImage = imagesArray[0];
     
     // Prepare images: use File objects if available, otherwise use URLs/base64
     const imageFilesArray = imageFiles.slice(0, 3);
-    const imagesForApi = imageFilesArray.map((file, index) => file || imagesArray[index]);
+    const imagesForApi = imageFilesArray.map((file, index) => file || imagesArray[index]).filter(Boolean);
     
     const menuItemData = {
       categoryId: formData.categoryId,
       name: formData.name.trim(),
       description: formData.description.trim(),
       price: formData.price,
-      image: imageFilesArray[0] || mainImage, // Main image - File object if available, otherwise URL/base64
-      images: imagesForApi, // All images - File objects if available, otherwise URLs/base64
+      image: imageFilesArray[0] || mainImage || undefined, // Main image - File object if available, otherwise URL/base64, or undefined
+      images: imagesForApi.length > 0 ? imagesForApi : undefined, // All images - File objects if available, otherwise URLs/base64, or undefined
       video: formData.video || undefined,
       ingredients: formData.ingredients,
       allergens: formData.allergens,
