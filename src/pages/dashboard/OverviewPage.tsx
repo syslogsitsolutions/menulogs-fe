@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Eye, ShoppingCart, DollarSign, TrendingUp, 
+  Eye, ShoppingCart, IndianRupee, TrendingUp, 
   TrendingDown, Clock, Star, Users, Loader2
 } from 'lucide-react';
 import { 
@@ -64,14 +64,14 @@ const OverviewPage = () => {
         },
         {
           label: 'Revenue',
-          value: '$0',
+          value: '₹0',
           change: 0,
-          icon: DollarSign,
+          icon: IndianRupee,
           color: 'purple'
         },
         {
           label: 'Avg. Order',
-          value: '$0.00',
+          value: '₹0.00',
           change: 0,
           icon: TrendingUp,
           color: 'orange'
@@ -101,14 +101,14 @@ const OverviewPage = () => {
       },
       {
         label: 'Revenue',
-        value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: `₹${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         change: analytics.periodComparison.revenueChange || 0,
-        icon: DollarSign,
+        icon: IndianRupee,
         color: 'purple'
       },
       {
         label: 'Avg. Order',
-        value: `$${avgOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        value: `₹${avgOrderValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         change: 0,
         icon: TrendingUp,
         color: 'orange'

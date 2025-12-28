@@ -87,7 +87,7 @@ const Footer = () => {
                 Powered by <span className="text-brand-400 font-medium">SysLogs IT Solutions</span>
               </p>
               <div className="flex space-x-4">
-                <a href="https://facebook.com/menulogs" target="_blank" rel="noopener noreferrer" className="hover:text-brand-500 transition-colors">
+                <a href="https://www.facebook.com/profile.php?id=61585359489477" target="_blank" rel="noopener noreferrer" className="hover:text-brand-500 transition-colors">
                   <Facebook className="w-5 h-5" />
                 </a>
                 <a href="https://instagram.com/menulogs" target="_blank" rel="noopener noreferrer" className="hover:text-brand-500 transition-colors">

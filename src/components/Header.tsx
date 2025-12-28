@@ -53,24 +53,49 @@ const Header = () => {
             >
               Home
             </Link>
-            <a 
-              href="#categories" 
-              className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
-            >
-              Menu
-            </a>
-            <a 
-              href="#about" 
-              className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
-            >
-              About
-            </a>
-            <a 
-              href="#contact" 
-              className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
-            >
-              Contact
-            </a>
+            {slug ? (
+              <>
+                <a 
+                  href="#categories" 
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  Menu
+                </a>
+                <Link 
+                  to={`/${slug}/about`}
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  About
+                </Link>
+                <Link 
+                  to={`/${slug}/contact`}
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  Contact
+                </Link>
+              </>
+            ) : (
+              <>
+                <a 
+                  href="#categories" 
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  Menu
+                </a>
+                <a 
+                  href="#about" 
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  About
+                </a>
+                <a 
+                  href="#contact" 
+                  className="text-dark-700 hover:text-brand-600 font-medium transition-colors duration-200"
+                >
+                  Contact
+                </a>
+              </>
+            )}
             {isAuthenticated ? (
               <button 
                 onClick={() => navigate('/dashboard')}
@@ -117,27 +142,55 @@ const Header = () => {
                 >
                   Home
                 </Link>
-                <a 
-                  href="#categories" 
-                  className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Menu
-                </a>
-                <a 
-                  href="#about" 
-                  className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  About
-                </a>
-                <a 
-                  href="#contact" 
-                  className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Contact
-                </a>
+                {slug ? (
+                  <>
+                    <a 
+                      href="#categories" 
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Menu
+                    </a>
+                    <Link 
+                      to={`/${slug}/about`}
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      About
+                    </Link>
+                    <Link 
+                      to={`/${slug}/contact`}
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Contact
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    <a 
+                      href="#categories" 
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Menu
+                    </a>
+                    <a 
+                      href="#about" 
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      About
+                    </a>
+                    <a 
+                      href="#contact" 
+                      className="block py-2 text-dark-700 hover:text-brand-600 font-medium"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Contact
+                    </a>
+                  </>
+                )}
                 {isAuthenticated ? (
                   <button 
                     onClick={() => { navigate('/dashboard'); setIsOpen(false); }}

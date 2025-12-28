@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter, Linkedin, Youtube } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { publicService } from '../../api';
+import { usePublicMenuBySlug } from '../../hooks/usePublicMenu';
 
 const ContactPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -13,6 +14,10 @@ const ContactPage = () => {
     queryFn: () => publicService.getContactPage(slug || ''),
     enabled: !!slug,
   });
+
+  // Fetch business data with social media URLs
+  const { data: menuData } = usePublicMenuBySlug(slug || '');
+  const businessWithSocial = menuData?.location?.business;
 
   if (!slug) {
     navigate('/');
@@ -243,6 +248,79 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Social Media Section */}
+      {(businessWithSocial?.facebookUrl || businessWithSocial?.instagramUrl || businessWithSocial?.twitterUrl || businessWithSocial?.linkedinUrl || businessWithSocial?.youtubeUrl) && (
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-3xl md:text-4xl font-bold text-dark-900 mb-4 font-serif">
+                Follow Us
+              </h2>
+              <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+                Stay connected with us on social media for the latest updates, special offers, and behind-the-scenes content.
+              </p>
+              <div className="flex flex-wrap justify-center gap-4">
+                {businessWithSocial?.facebookUrl && (
+                  <a
+                    href={businessWithSocial.facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Facebook className="w-6 h-6" />
+                  </a>
+                )}
+                {businessWithSocial?.instagramUrl && (
+                  <a
+                    href={businessWithSocial.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Instagram className="w-6 h-6" />
+                  </a>
+                )}
+                {businessWithSocial?.twitterUrl && (
+                  <a
+                    href={businessWithSocial.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Twitter className="w-6 h-6" />
+                  </a>
+                )}
+                {businessWithSocial?.linkedinUrl && (
+                  <a
+                    href={businessWithSocial.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Linkedin className="w-6 h-6" />
+                  </a>
+                )}
+                {businessWithSocial?.youtubeUrl && (
+                  <a
+                    href={businessWithSocial.youtubeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 bg-brand-500 text-white rounded-full flex items-center justify-center hover:bg-brand-600 hover:scale-110 transition-all duration-300 shadow-lg"
+                  >
+                    <Youtube className="w-6 h-6" />
+                  </a>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-brand-500 to-brand-600 text-white">
